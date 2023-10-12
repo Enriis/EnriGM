@@ -1,0 +1,20 @@
+{
+    "char1:e08daad08f417fbe45205d3446ae05b6106b250a": {
+        "pacific": {
+            "bloccati": 0,
+            "pin": 1234,
+            "money": 0,
+            "iban": "Di-564065-6099-Pa",
+            "banca": "Pacific Bank",
+            "grade": 0
+        },
+        "fleeca": {
+            "bloccati": 0,
+            "pin": 1234,
+            "money": 0,
+            "iban": "Di-859935-7180-Fl",
+            "banca": "Fleeca Bank",
+            "grade": 2
+        }
+    }
+}

@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+@font-face {
+  font-family: justsignature;
+  src: url('../fonts/justsignature/JustSignature.woff');
+}
+
+*,*:after,*:before{
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+body{
+	font-family: arial;
+	font-size: 1.6vh;
+	margin: 0;
+	display: flex;
+	justify-content: space-around;
+}
+
+.tilt-box-wrap{
+  width: 45vh;
+  height: 29vh;
+	position: relative;
+	transition: all 0.6s ease-out;
+	perspective: 1000px
+}
+
+.tilt-box-wrap:hover{
+	transition: all 0.3s linear;
+}
+
+.tilt-box{
+  width: 45vh;
+  height: 29vh;
+	position: relative;
+	display: flex;
+	transition: all 0.6s ease-out;
+	transform:rotateX(0deg) rotateY(0deg);
+	perspective: 1000px;
+	transform-style: preserve-3d;
+	justify-content: space-around;
+}
+
+.t_over{
+	width: 33.333%;
+	height: 33.333%;
+	position: absolute;
+	z-index: 1;
+}
+
+.t_over:nth-child(1){ left: 0; top: 0; }
+.t_over:nth-child(2){ left: 33.333%; top: 0; }
+.t_over:nth-child(3){ left: 66.666%; top: 0; }
+.t_over:nth-child(4){ left: 0; top: 33.333%; }
+.t_over:nth-child(5){ left: 33.333%; top: 33.333%; }
+.t_over:nth-child(6){ left: 66.666%; top: 33.333%; }
+.t_over:nth-child(7){ left: 0; top: 66.666%; }
+.t_over:nth-child(8){ left: 33.333%; top: 66.666%; }
+.t_over:nth-child(9){ left: 66.666%; top: 66.666%; }
+.t_over:nth-child(1):hover ~ .tilt-box{transform:rotateX(-20deg) rotateY(20deg);}
+.t_over:nth-child(2):hover ~ .tilt-box{transform: rotateX(-20deg) rotateY(0deg)}
+.t_over:nth-child(3):hover ~ .tilt-box{transform: rotateX(-20deg) rotateY(-20deg)}
+.t_over:nth-child(4):hover ~ .tilt-box{transform: rotateX(0deg) rotateY(20deg)}
+.t_over:nth-child(5):hover ~ .tilt-box{transform: rotateX(0deg) rotateY(0deg)}
+.t_over:nth-child(6):hover ~ .tilt-box{transform: rotateX(0deg) rotateY(-20deg)}
+.t_over:nth-child(7):hover ~ .tilt-box{transform:rotateX(20deg) rotateY(20deg);}
+.t_over:nth-child(8):hover ~ .tilt-box{transform: rotateX(20deg) rotateY(0deg)}
+.t_over:nth-child(9):hover ~ .tilt-box{transform: rotateX(20deg) rotateY(-20deg)}
+
+/* DOC */
+
+#contenitore-documenti {
+    position: absolute;
+    width: 45vh;
+    height: 29vh;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    font-family: 'Montserrat', sans-serif;
+    left: 5%;
+    top: 5%;
+    user-select: none;
+    -webkit-animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    display: none;
+    
+}
+
+#immaginePersonale {
+  position: absolute;
+  height:13vh;
+  width: 11.0vh;
+  background-position: center;
+  background-size: cover;
+  overflow: hidden;
+  left:3vh;
+  top:7.5vh;
+  border-radius: 1.2vh;
+  border-color: transparent;
+}
+
+#immaginePersonalePatente {
+  position: absolute;
+  height:13vh;
+  width: 11.0vh;
+  background-position: center;
+  background-size: cover;
+  overflow: hidden;
+  left:3vh;
+  top:7.5vh;
+  border-radius: 1.2vh;
+  border-color: transparent;
+}
+
+/* TESTO */
+
+#nome {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 27%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#cognome {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 37%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#datadinascita {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 47.8%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);    
+}
+
+#altezza {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 58.7%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#sesso {
+  position: absolute;
+  right: 12.5%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  bottom: 33%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#firma {
+  position: absolute;
+  right: 12%;
+  font-size: 13px;
+  color: white;
+  bottom: 13%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+  text-transform:capitalize;
+  text-align: center;
+  font-family: justsignature;
+}
+
+/* PATENTI */
+
+#contenitore-patente {
+  position: absolute;
+  width: 45vh;
+  height: 29vh;
+  background-image: url('https://media.discordapp.net/attachments/1009499094399594598/1021794684869300274/patente.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  font-family: 'Montserrat', sans-serif;
+  left: 5%;
+  top: 5%;
+  user-select: none;
+  -webkit-animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+  animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+  display: none;
+}
+
+.totale{
+  position: absolute;
+  left: 62%;
+  transform: translate(-50% , 870%);
+  width: 50%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  color: white;
+  margin: 0;
+}
+
+.pallino {
+  position: relative;
+  justify-self: center;
+  width: 2vh;
+  height: 2vh;
+  background-color: rgb(255, 17, 0);
+  box-shadow: rgba(175, 0, 0, 0.623) 0px 15px 28px, rgba(175, 0, 0, 0.658) 0px 8px 8px;
+  border-radius: 50%;
+}
+
+#testo {
+  margin-top: 120%;
+  margin-left: -20%;
+  left: 0%;
+  width: 100%;
+  justify-self: center;
+  text-align: center;
+  color:white;
+}
+
+#nomePatente {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 27%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#cognomePatente {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 37%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#datadinascitaPatente {
+  position: absolute;
+  left: 55%;
+  font-size: 1.8575851393188854vh;
+  color: white;
+  top: 47.8%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+}
+
+#firmaPatente {
+  position: absolute;
+  right: 12%;
+  font-size: 1.3415892672858618vh;
+  color: white;
+  bottom: 13%;
+  text-shadow: 0px 0px 6px rgba(255,255,255,0.7);
+  text-transform:capitalize;
+  text-align: center;
+  font-family: justsignature;
+}
+
+/* COSE INUTILI */
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* ANIMAZIONI */
+
+@-webkit-keyframes slide-in-top {
+    0% {
+      -webkit-transform: translateY(-1000px);
+              transform: translateY(-1000px);
+      opacity: 0;
+    }
+    100% {
+      -webkit-transform: translateY(0);
+              transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in-top {
+    0% {
+      -webkit-transform: translateY(-1000px);
+              transform: translateY(-1000px);
+      opacity: 0;
+    }
+    100% {
+      -webkit-transform: translateY(0);
+              transform: translateY(0);
+      opacity: 1;
+    }
+}

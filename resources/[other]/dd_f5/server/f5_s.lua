@@ -1,0 +1,10 @@
+RegisterCommand("propow", function(source, args)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local prop = exports['esx_property']:GetOwnedProperties()
+    TriggerClientEvent("print", source, prop, xPlayer.getIdentifier())
+end, true)
+
+ESX.RegisterServerCallback("dd_f5:getPropertyOwners", function(source, cb)
+    local prop = exports['esx_property']:GetOwnedProperties()
+    cb(prop)
+end)

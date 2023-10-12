@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap');
+
+@font-face {
+  font-family: ilmiofont2;
+  src: url(MonumentExtended-Regular.otf);
+}
+
+body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: rgba(232, 75, 75, 0.34);
+}
+
+
+.containerMain-hot {
+  display: none;
+}
+
+.container-hot {
+  width: 100%;
+  height: 0%;
+  margin-top: 90px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.maintext {
+  color: white;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 35px;
+  text-align: center;
+  width: 608px;
+  height: 40px;
+  margin-top: 80px;
+  margin-left: 650px;
+  text-shadow: 2px 2px 8px #0b0b0b;
+}
+
+
+.control-group-hot {
+  display: inline-block;
+  vertical-align: top;
+  text-align: left;
+  width: 280px;
+  height: 650px;
+  margin: 20px;
+  transition: transform .1s;
+  border-radius: 10px;
+  text-shadow: 2px 2px 8px #0b0b0b;
+  border-style: ridge;
+  border-color: rgb(0, 0, 0);
+  background-color: #0b0b0b00;
+}
+
+.text-box-hot {
+  margin-top: 58%;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 30px;
+  width: 100%;
+  border-radius: 5%;
+  line-height: 45px;
+  text-shadow: 2px 2px 8px #0b0b0b;
+}
+
+.infokit {
+  color: white;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  text-align: center;
+  margin-top: -400px;
+  font-size: 20px;
+  text-shadow: 2px 2px 8px #0b0b0b;
+}
+
+.control-text-hot {
+  font-family: ilmiofont2;
+  color:  white;
+  text-align: center;
+  margin-top: 200%;
+
+  font-size: 25px;
+  text-shadow: 2px 2px 8px #0b0b0b;
+  /* background-color: black; */
+}
+
+
+i {
+  text-align: center;
+  display: block;
+  margin-left: 48%;
+  transform: scale(5,5);
+  margin-top: 40%;
+  color: white;
+}
+
+
+.control-group-hot:hover {
+  gap: 10%;
+  transform: scale(1.15);
+}

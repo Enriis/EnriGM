@@ -1,0 +1,295 @@
+body {
+    background: none !important;
+}
+
+
+#container {
+    display: flex;
+    min-height: 100vh;
+    padding: 0; margin: 0;
+    transition: 0.1s ease-in;
+
+}
+
+:root {
+	--dk-gray-100: #F3F4F6;
+	--dk-gray-200: #E5E7EB;
+	--dk-gray-300: #D1D5DB;
+	--dk-gray-400: #9CA3AF;
+	--dk-gray-500: #6B7280;
+	--dk-gray-600: #4B5563;
+	--dk-gray-700: #374151;
+	--dk-gray-800: #1F2937;
+	--dk-gray-900: #111827;
+	--dk-dark-bg: #313348;
+	--dk-darker-bg: #2a2b3d;
+	--navbar-bg-color: #6f6486;
+	--sidebar-bg-color: #252636;
+	--sidebar-width: 250px;
+}
+
+
+.welcome {
+	color: #ffffff;
+}
+
+.welcome .content {
+	background-color: #283039;
+}
+
+.welcome p {
+	color: #ffffff;
+}
+
+
+
+.statistics {
+	color: #ffffff;
+}
+
+.statistics .box {
+	background-color: #283039;
+}
+
+.statistics .box i {
+	width: 60px;
+	height: 60px;
+	line-height: 60px;
+}
+
+.statistics .box p {
+	color: #ffffff;
+}
+
+
+#pagina0 {
+    width: 100%;
+}
+#main0 {
+    margin-top: 50px;
+    margin-left: 35px;
+    width: 1400px;
+    height: 100px;
+    border-style: ridge;
+    border-radius: 12px;
+    /* padding: 40px; */
+    background-color: #283039;
+    position: relative;
+}
+
+#pagina0 #main0 .pagina0text {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 40px;
+}
+
+#pagina0 .pagina0text {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 22px;
+}
+
+#pagina1 {
+    width: 100%;
+}
+#main1 {
+    margin-top: 50px;
+    margin-left: 35px;
+    width: 1400px;
+    height: 100px;
+    border-style: ridge;
+    border-radius: 12px;
+    /* padding: 40px; */
+    background-color: #283039;
+    position: relative;
+}
+
+#pagina1 #main1 .pagina0text {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 40px;
+}
+
+#pagina1 .pagina0text {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 22px;
+}
+
+
+#pagina2 {
+    width: 100%;
+}
+
+#pagina2 .pagina0text {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 22px;
+}
+
+#main2 {
+    margin-top: 50px;
+    margin-left: 35px;
+    width: 1400px;
+    height: 100px;
+    border-style: ridge;
+    border-radius: 12px;
+    /* padding: 40px; */
+    background-color: #283039;
+    position: relative;
+}
+
+#pagina2 #main2 .pagina0text {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 40px;
+}
+
+
+
+#pgside {
+    width: 320px;
+    transition: width 0.2s;
+    background: #283039;
+}
+
+#pgside #pguser{
+    display: flex;
+    align-items: center;
+    padding: 40px 0px;
+}
+
+#pgside #pguser:hover{
+    color: red;
+    display: flex;
+    align-items: center;
+    padding: 40px 0px;
+    cursor: pointer;
+}
+
+#pgside #pguser img {
+    width: 70px;
+    margin-right: 5px;
+    border-radius: 50%
+}
+
+#pgside #pguser i.txt {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 20px;
+}
+
+#pgside #cpagina1 i.txt {
+    font-size: 22px;
+}
+
+#pgside #cpagina2 i.txt {
+    font-size: 22px;
+}
+
+#pgside #cpagina3 i.txt {
+    font-size: 22px;
+}
+
+#pgside #cpagina4 i.txt {
+    font-size: 22px;
+}
+
+#pgside #cpagina5 i.txt {
+    font-size: 22px;
+}
+
+#pgside #cpagina6 i.txt {
+    font-size: 22px;
+}
+  
+#pgside, #pgside a { 
+    color: #fff; 
+}
+  
+#pgside a {
+    display: block;
+    padding: 25px;
+    width: 100%;
+    text-decoration: none;
+    cursor: pointer;
+}
+  
+#pgside a:hover { 
+    background: #9b2323; 
+}
+  
+@media screen and (max-width:768px) {
+    #pgside { 
+        width: 70px; 
+    }
+    #pgside #pguser { 
+        justify-content: center; 
+    }
+    #pgside a {
+      text-align: center;
+      padding: 50px 0;
+    }
+    #pgside i.ico {
+      font-size: 1.5em;
+      margin-right: 0;
+    }
+    #pgside i.txt { 
+        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        display: none; 
+        border-style: ridge; 
+        border-radius: 12px;
+    }
+}
+  
+#pgmain {
+    flex-grow: 1;
+    padding: 20px;
+    background: #f2f2f2;
+}
+  
+
+
+/*  */
+
+input[type="text"] {
+    width: 300px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+button {
+    padding: 5px 10px;
+    font-size: 16px;
+}
+
+#searchResults {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    color: white;
+    padding: 10px;
+    background-color: black;
+}

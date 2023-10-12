@@ -1,0 +1,430 @@
+@font-face {
+    font-family: bankgothic;
+    src: url('../fonts/bankgothic.ttf');
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+body,
+.menu,
+.menu.align-bottom-right {
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+}
+
+.shake2 {
+    /* animation-name:shake-slow;animation-duration:10s;animation-timing-function:ease-in-out;animation-iteration-count:infinite; */
+    position: fixed;
+    right: 0px;
+    height: 100%;
+}
+
+.menu {
+    font-family: bankgothic;
+	min-width: 360px;
+    color: #fff;
+    position: absolute;
+    border-radius: 10px;
+    /*padding: 30px 20px 30px 30px;*/
+    /*transition: 0.3s;*/
+    /**/
+    padding: 25px 10px 20px 10px;
+    overflow: visible !important;
+}
+
+.headtitle{
+    margin-right: 1.6vw;
+}
+
+.spinner{
+    animation:rotar 1s linear infinite;
+    position: absolute;
+    width: 1.35vw;
+    top: 0.5vw;
+    right: 0.3vw;
+}
+
+
+.headtitle div {
+    display: none;
+}
+
+.headtitle span {
+    text-shadow: none;
+}
+
+.menu.align-bottom-right {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-left {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-top-left {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-top {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-top-right {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-right {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-bottom {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-bottom-left {
+    bottom: 765px;
+    right: 20px;
+}
+.menu.align-center {
+    bottom: 765px;
+    right: 20px;
+}
+
+
+.arrow-left{
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 1vw solid transparent;
+    border-bottom: 1vw solid transparent;
+    border-right: 1vw solid white;
+    top: -1.97vw;
+    left: -1.3vw;
+}
+
+.menu .head {
+    text-align: left;
+    background-size: cover;
+    font-size: 1.1vw;
+    text-shadow: 0 0 20px #ffffff;
+    padding: .5vw;
+    /* border: 1px solid #000000; */
+    margin-bottom: 9px;
+    background-color: #ffffff;
+    color: black;
+    margin-bottom: 0;
+    z-index: 5 !important;
+    /* clip: rect(-3vw, 0vw, 3vw, -3vw); */
+    box-shadow: 0 0 10px white;
+    /* animation: head 0.5s ease-in-out forwards; */
+    position: absolute;
+    top: -2.2vw;
+    left: -.5vw;
+    border-left: 4px solid white;
+    /* opacity: 0;*/    
+}
+
+.abrirMenu .head, .abrirMenu .arrow-left {
+    animation: cabecera 0.1s cubic-bezier(0, .67, .39, 1.01) forwards;
+    opacity: 0;
+    
+}
+
+.anim-entrada {
+    animation: cabecera 0.2s cubic-bezier(0, .67, .39, 1.01) forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+
+.menu .menu-items {
+    max-height: 14.7vw;
+    overflow-y: scroll;
+    border-radius: 5px;
+    margin: 5px 0 0 0;
+    overflow-x: visible;
+    padding-right:.2vw;
+}
+
+.bg-items{
+
+    width: 100%;
+    height: 100%;
+    background-color: #000000a6;
+    position: absolute;
+    top: 0;
+    left: 0;
+    filter: blur(15px);
+    z-index: -1;
+}
+
+.menu .items-container {
+    padding: .5vw .3vw .5vw .5vw;
+    /* background-color: #000000ad; */
+    /* box-shadow: 0 0 30px #000000e0; */
+    /* border-radius: 5px; */
+    z-index: 0 !important;
+    /* border: 1px solid #ffffff80; */
+    position: absolute;
+    /* clip: rect(-3vw,20vw,0vw,-3vw); */
+    /* opacity: 0; */
+    /* animation: menu-items 0.5s ease-in-out forwards; */
+    /* animation-delay: 0.2s;*/
+}
+
+.menu .menu-items .menu-item {
+    display: block;
+    height: max-content;
+    line-height: 2vh;
+    color: black;
+    text-align: left;
+    font-size: 1.1rem;
+    /* border-radius: 5px; */
+    color: white;
+    margin: 0px 7px 10px 7px;
+    padding-left: 7px;
+    /* background-color: black; */
+    padding: .1vw .4vw;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 800;
+    padding:.8vh;
+}
+
+.menu .menu-items .menu-item.selected {
+    box-shadow: 0 0 5px rgba(251, 251, 251, 0.778);
+    color: black;
+        animation: glitchy 0s ease 1 forwards;
+    transform: scale(1.02);
+    transition: ease-in-out 0.3s;
+    font-weight: 800;
+
+}
+
+.abrirMenu {
+}
+
+.cerrarMenu {
+}
+
+ ::-webkit-scrollbar-track {
+    background-color: #000000;
+}
+
+ ::-webkit-scrollbar {
+    width: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
+}
+
+ ::-webkit-scrollbar-thumb {
+    background-color: #ffffffe5;
+    border-radius: 3px;
+}
+
+.botones {
+    position: absolute;
+    right: 5px;
+}
+
+.marker{
+    font-weight:bold;
+    display: inline-block;
+}
+
+.selected .marker{
+    animation:marker 0.8s ease-in-out infinite;
+}
+
+
+@keyframes abrirMenu {
+    from {
+        /*
+        transform: perspective(500px) rotateY( -50deg);
+        opacity:0%;*/
+        opacity: 0%;
+        /* clip:rect(-33px,472px,26px,0px); */
+        transform: scale(0.8) perspective(400px) rotateY(-40deg);
+        clip-path: circle(20%);
+
+        /* filter: blur(20px); */
+    }
+    to {
+        /*
+        transform: perspective(400px) rotateY( -20deg);
+        opacity:100%;*/
+        opacity: 100%;
+        transform: scale(1.0) perspective(0px) rotateY(0deg);
+
+        clip-path: circle(288%);
+        /* filter: blur(0px); */
+        /* clip:rect(-33px,472px,610px,0px); */
+
+    }
+}
+
+@keyframes cerrarMenu {
+    /*
+    from {
+        transform: perspective(400px) rotateY( -20deg);
+    }
+    to {
+        transform: perspective(500px) rotateY( -50deg);
+        opacity: 0;
+    }
+    */
+    from {
+        opacity: 100%;
+        transform: scale(1.0) perspective(0px) rotateY(0deg);
+        clip-path: circle(288%);
+        /* filter: blur(0px); */
+    }
+    to {
+        opacity: 0%;
+        transform: scale(0.8) perspective(400px) rotateY(-40deg);
+        clip-path: circle(20%) ;
+        /* filter: blur(20px); */
+    }
+}
+
+@keyframes glitchy {
+    0% {
+        background-color: rgba(0, 0, 0, 0);
+        transform: translate(-2px, 2px);
+    }
+    25% {
+        transform: translate(-2px, -2px);
+    }
+    50% {
+        transform: translate(2px, 2px);
+    }
+    75% {
+        transform: translate(2px, -2px);
+    }
+    100% {
+        transform: translate(-2px, 2px);
+        background-color: white;
+        box-shadow: 0 0 5px white !important;
+    }
+
+}
+
+@keyframes cabecera {
+    from {
+        opacity: 0;
+        transform: translate(-50px, 0px);
+    }
+    to {
+        opacity: 100;
+        transform: translate(0px, 0px);
+    }
+}
+
+
+/*
+@keyframes items {
+    from {
+        opacity: 0;
+        transform: translate(100px, 0px);
+    }
+    to {
+        opacity: 100;
+        transform: translate(0px, 0px);
+    }
+}
+*/
+
+.shake {
+    display: block !important;
+    /*animation-name:shake-slow;animation-duration:10s;animation-timing-function:ease-in-out;animation-iteration-count:infinite;*/
+    /*transition-timing-function: cubic-bezier(0.950, 0.080, 0.975, 0.035);*/
+    box-shadoW:0 0 60px #00000069;
+    transform:perspective(6vw) rotateY(-2deg);
+
+}
+
+@keyframes shake-slow {
+    0% {
+        transform: translate(0, 0px) rotate(0) 
+    }
+    15% {
+        transform: translate(0px, 3px) rotate(-.3deg)
+    }
+    30% {
+        transform: translate(0px, -3px) rotate(0.5deg)
+    }
+    45% {
+        transform: translate(0px, 3px) rotate(-.5deg)
+    }
+    62% {
+        transform: translate(0px, -3px) rotate(.5deg)
+    }
+    79% {
+        transform: translate(0px, 3px) rotate(0deg)
+    }
+    98% {
+        transform: translate(0px, -3px) rotate(0deg)
+    }
+    100% {
+        transform: translate(0, 0px) rotate(0)
+    }
+}
+
+@keyframes head {
+    0%{
+        opacity:0;
+
+        clip: rect(-3vw, 0vw, 3vw, -3vw);
+    }
+    100%{
+        opacity:100;
+
+        clip:rect(-3vw,20vw,3vw,-3vw)
+    }
+}
+
+@keyframes menu-items {
+    0%{
+        opacity:0;
+        clip:rect(-3vw,20vw,0vw,-3vw);
+    }
+
+    100%{
+        opacity:100;
+
+        clip:rect(-3vw,20vw,20vw,-3vw);
+    }
+}
+
+@keyframes marker {
+    0%{
+        transform: translateX(-3px);
+
+    }
+    50%{
+    transform: translateX(3px);
+        
+    }
+    100%{
+    transform: translateX(-3px);
+    
+    }
+}
+
+@keyframes rotar {
+    0%{
+        transform:rotate(0deg)
+    }
+
+    100%{
+        transform: rotate(360deg);
+    }
+}
+
+@media(max-height:720px){
+    .menu.align-right {
+        right: 22vw !important;
+    }
+}
