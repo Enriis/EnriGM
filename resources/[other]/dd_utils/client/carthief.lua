@@ -16,61 +16,65 @@ RegisterNetEvent("dd_thief:setValCLGlob", function(val, type)
     StateCarThiefServer = tonumber(val)
 end)
 
-Citizen.CreateThread(function()
-    if ConfigCarthief.debug then
-        FreezeEntityPosition(PlayerPedId(), false)
-        print("load furto veicolo")
-    end
-    TriggerServerEvent("dd_thief:loadLocalClient", GetPlayerServerId(PlayerId()))
-    for k,v in pairs(ConfigCarthief) do
-        if k == "Pablo" then
-            TriggerEvent('gridsystem:registerMarker', {
-                name = 'furto_'..k,
-                type = 23,
-                texture = nil,
-                scale = vec3(0.8,0.8,0.8),
-                color = { r = 255, g = 0, b = 0 },
-                pos = v.pos,
-                control = 'E',
-                posizione = "left-center",
-                titolo = v.label,
-                action = function()
-                    if FurtoScelto then ESX.ShowNotification("Hai gia iniziato un furto di veicolo", "error") return end
-                    FreezeEntityPosition(PlayerPedId(), true)
-                    if StateCarThiefServer < 2 then
-                        if lib.progressBar({
-                            duration = 2000,
-                            label = 'Talk Pablo',
-                            useWhileDead = false,
-                            canCancel = true,
-                            disable = {
-                                car = true,
-                            },
-                            anim = {
-                                dict = 'anim@amb@casino@brawl@vincent@',
-                                clip = 'walk_and_talk_vincent_s_m_y_doorman_01'
-                            },
-                        }) then else return end
-                        FreezeEntityPosition(PlayerPedId(), false)
-                        StartFurto()
-                    elseif StateCarThiefServer >= 2 then
-                        --No
-                        ESX.ShowNotification("C'e gia un furto di veicolo in corso, Attendi", "info")
-                        FreezeEntityPosition(PlayerPedId(), false)
-                        return
-                    end
-                end,
-                onEnter = function()
-                end,
-                onExit = function()
-                    lib.hideTextUI()
-                    ESX.UI.Menu.CloseAll()
-                end,
-                msg = "INTERAGIRE",
-            })
-        end
-    end
-end)
+
+
+-- Citizen.CreateThread(function()
+--     if ConfigCarthief.debug then
+--         FreezeEntityPosition(PlayerPedId(), false)
+--         print("load furto veicolo")
+--     end
+--     TriggerServerEvent("dd_thief:loadLocalClient", GetPlayerServerId(PlayerId()))
+--     for k,v in pairs(ConfigCarthief) do
+--         if k == "Pablo" then
+--             TriggerEvent('gridsystem:registerMarker', {
+--                 name = 'furto_'..k,
+--                 type = 23,
+--                 texture = nil,
+--                 scale = vec3(0.8,0.8,0.8),
+--                 color = { r = 255, g = 0, b = 0 },
+--                 pos = v.pos,
+--                 control = 'E',
+--                 posizione = "left-center",
+--                 titolo = v.label,
+--                 action = function()
+--                     if FurtoScelto then ESX.ShowNotification("Hai gia iniziato un furto di veicolo", "error") return end
+--                     FreezeEntityPosition(PlayerPedId(), true)
+--                     if StateCarThiefServer < 2 then
+--                         if lib.progressBar({
+--                             duration = 2000,
+--                             label = 'Talk Pablo',
+--                             useWhileDead = false,
+--                             canCancel = true,
+--                             disable = {
+--                                 car = true,
+--                             },
+--                             anim = {
+--                                 dict = 'anim@amb@casino@brawl@vincent@',
+--                                 clip = 'walk_and_talk_vincent_s_m_y_doorman_01'
+--                             },
+--                         }) then else return end
+--                         FreezeEntityPosition(PlayerPedId(), false)
+--                         StartFurto()
+--                     elseif StateCarThiefServer >= 2 then
+--                         --No
+--                         ESX.ShowNotification("C'e gia un furto di veicolo in corso, Attendi", "info")
+--                         FreezeEntityPosition(PlayerPedId(), false)
+--                         return
+--                     end
+--                 end,
+--                 onEnter = function()
+--                 end,
+--                 onExit = function()
+--                     lib.hideTextUI()
+--                     ESX.UI.Menu.CloseAll()
+--                 end,
+--                 msg = "INTERAGIRE",
+--             })
+--         end
+--     end
+-- end)
+
+
 
 function StartFurto()
     TriggerServerEvent("dd_thief:action", GetPlayerServerId(PlayerId()), "addFurto")

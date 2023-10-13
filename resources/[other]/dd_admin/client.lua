@@ -1,5 +1,4 @@
 local DD = {}
-asdasdas
 local StatePexCl
 
 RegisterNetEvent("dd_admin:sendPexCl", function(pex)
