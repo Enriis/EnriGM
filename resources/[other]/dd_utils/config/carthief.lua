@@ -2,7 +2,7 @@ ConfigCarthief = {
 
     debug = true,
 
-    timerFurto = 60, --secondi 
+    timerFurto = 10, --secondi 
 
     ["Pablo"] = {
         pos = vector3(1261.0563964844,310.64697265625,81.990905761719),
@@ -51,5 +51,25 @@ ConfigCarthief = {
             ricompensa = math.random(10000, 12000),
             car = "ZR350"
         }
+    },
+
+    ["EndCar"] = {
+        [1] = vector3(1196.6904296875,-3106.7155761719,6.0215163230896)
+        -- [2] = vector3(0,0,0),
+        -- [3] = vector3(0,0,0),
+        -- [4] = vector3(0,0,0),
+        -- [5] = vector3(0,0,0),
+        -- [6] = vector3(0,0,0),
+        -- [7] = vector3(0,0,0),
+        -- [8] = vector3(0,0,0),
+        -- [9] = vector3(0,0,0),
+        -- [10] = vector3(0,0,0),
+        -- [11] = vector3(0,0,0),
+        -- [12] = vector3(0,0,0),
+        -- [13] = vector3(0,0,0),
+        -- [14] = vector3(0,0,0),
+        -- [15] = vector3(0,0,0),
+        -- [16] = vector3(0,0,0),
+        -- [17] = vector3(0,0,0)
     }
 }

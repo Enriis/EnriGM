@@ -1,6 +1,6 @@
 CountServerFurti = 0
 
-RegisterServerEvent("dd_thief:action", function(source, azione)
+RegisterServerEvent("dd_thief:action", function(source, azione, other)
     local xPlayer = ESX.GetPlayerFromId(source)
     if azione == "addFurto" then
         CountServerFurti = CountServerFurti + 1
@@ -10,6 +10,11 @@ RegisterServerEvent("dd_thief:action", function(source, azione)
         CountServerFurti = CountServerFurti - 1
         Wait(100)
         TriggerClientEvent("dd_thief:setValCLGlob", -1, CountServerFurti, xPlayer.getName())
+    elseif azione == "consegna" then
+        CountServerFurti = CountServerFurti - 1
+        Wait(100)
+        TriggerClientEvent("dd_thief:setValCLGlob", -1, CountServerFurti, xPlayer.getName())
+        xPlayer.addInventoryItem("money", tonumber(other))
     end
 end)
 
