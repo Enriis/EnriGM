@@ -305,8 +305,7 @@ if ESX.GetConfig().Multichar then
 				end)
 			end)
 			repeat Wait(200) until finished
-			Wait(800)
-			ExecuteCommand("kit")
+			foto()
 		end
 		DoScreenFadeOut(100)
 
@@ -344,27 +343,18 @@ if ESX.GetConfig().Multichar then
 
 	if Config.commands.relog then
 		RegisterCommand('relog', function(source, args, rawCommand)
-			if canRelog == true then
-				canRelog = false
-				TriggerServerEvent('esx_multicharacter:relog')
-				ESX.SetTimeout(10000, function()
-					canRelog = true
-				end)
-			end
+			TriggerServerEvent('esx_multicharacter:relog')
 		end)
 	end
-	RegisterNetEvent('aer_3dlogin:foto')
-	AddEventHandler('aer_3dlogin:foto', function()
-		foto()
-	end)
 	cam = nil
 	lastcoords= nil
 	function foto()
 		--print("FACCIO LA FOTO", ESX.PlayerData.coords)
 		lastcoords = GetEntityCoords(PlayerPedId())
 		TriggerServerEvent("aer_3login_map:open", "L0vZboEil3", math.random(5,100))
-		defaultCamPos = vector3(644.043945, 10.931869, 82.778076)
+		defaultCamPos = vector3(-269.39846801758,-955.30096435547,31.211368560791)
 		SetEntityCoords(PlayerPedId(), defaultCamPos)
+		SetEntityHeading(PlayerPedId(), 205.8000030517578)
 		Wait(800)
 		FreezeEntityPosition(PlayerPedId(), true, true)
 		local coords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0, 2.0, 0)
@@ -387,7 +377,7 @@ if ESX.GetConfig().Multichar then
 		camOffset = 2.0
 		--
 		Wait(500)
-		exports['screenshot-basic']:requestScreenshotUpload('https://discord.com/api/webhooks/1145036185136267334/t8kTfe13THd4cWx68fGOyoZGKS83tboFr2RHJwBDubTsjLH0xrHoZYrnaPbAF1gAlP88', 'files[]', function(data)
+		exports['screenshot-basic']:requestScreenshotUpload('https://discord.com/api/webhooks/1162704205761486848/djALzxKrVmmH35tIRxZeT6dc_fkqURLKAC6vN6EgVCIFpJY2vMImdq9wRjLJOJYdgd5S', 'files[]', function(data)
 			local resp = json.decode(data)
 			TriggerServerEvent("aer_3login_map:foto", ESX.GetPlayerData().identifier, resp.attachments[1].proxy_url)
 		end)
@@ -398,9 +388,9 @@ if ESX.GetConfig().Multichar then
 		FreezeEntityPosition(PlayerPedId(), false, false)
 		if Config.action.SpawnSelect then
 			openSpawnSelector() 
-		else 
-			SetEntityCoords(PlayerPedId(), lastcoords)
 		end
+		Wait(800)
+		ExecuteCommand("kit")
 		TriggerServerEvent("aer_3login_map:close", "L0vZboEil3")
 		lastcoords = nil
 	end
@@ -497,8 +487,3 @@ if Config.action.SpawnSelect then
 		end
 	end)
 end
-
-RegisterCommand("ciao", function()
-	print("gogogog")
-	TriggerServerEvent('esx_multicharacter:relog')
-end)
