@@ -1,6 +1,7 @@
 if not ESX then
 	error('\n^1Unable to start Multicharacter - you must be using ESX Legacy^0')
 elseif ESX.GetConfig().Multichar == true then
+
 	local DATABASE do
 		local connectionString = GetConvar('mysql_connection_string', '');
 		if connectionString == '' then
@@ -69,8 +70,8 @@ elseif ESX.GetConfig().Multichar == true then
 
 				local accounts = json.decode(v.accounts)
 				local id = tonumber(string.sub(v.identifier, #PREFIX+1, string.find(v.identifier, ':')-1))
-
-				characters[id] = {
+				if v.sex == "male" then v.sex = "m" elseif v.sex == "famale" then v.sex = "f" end
+				characters[tostring(id)] = {
 					id = id,
 					bank = accounts.bank,
 					money = accounts.money,
@@ -81,7 +82,8 @@ elseif ESX.GetConfig().Multichar == true then
 					dateofbirth = v.dateofbirth,
 					skin = v.skin and json.decode(v.skin) or {},
 					disabled = v.disabled,
-					sex = v.sex == 'm' and _('male') or _('female')
+					image = v.image,
+					sex = v.sex
 				}
 			end
 		end
@@ -114,7 +116,6 @@ elseif ESX.GetConfig().Multichar == true then
 			count += 1
 			queries[count] = {query = query:format(table, column), values = {identifier}}
 		end
-
 		MySQL.transaction(queries, function(result)
 			if result then
 				print(('[^2INFO^7] Player ^5%s %s^7 has deleted a character ^5(%s)^7'):format(GetPlayerName(source), source, identifier))
@@ -174,7 +175,7 @@ elseif ESX.GetConfig().Multichar == true then
 				Wait(50)
 			until next(ESX.Jobs)
 
-			FETCH = 'SELECT identifier, accounts, job, job_grade, firstname, lastname, dateofbirth, sex, skin, disabled FROM users WHERE identifier LIKE ? LIMIT ?'
+			FETCH = 'SELECT identifier, accounts, job, job_grade, firstname, lastname, dateofbirth, sex, skin, disabled, image FROM users WHERE identifier LIKE ? LIMIT ?'
 		end
 	end)
 
@@ -187,6 +188,9 @@ elseif ESX.GetConfig().Multichar == true then
 	RegisterNetEvent('esx_multicharacter:CharacterChosen', function(charid, isNew)
 		if type(charid) == 'number' and string.len(charid) <= 2 and type(isNew) == 'boolean' then
 			if isNew then
+				if charid == 1 and isNew then 
+					MySQL.prepare('INSERT INTO `multicharacter_slots` SET `identifier` = ?, `slots` = ?', {GetIdentifier(source), 1})
+				end
 				awaitingRegistration[source] = charid
 			else
 				TriggerEvent('esx:onPlayerJoined', source, PREFIX..charid)
@@ -194,6 +198,7 @@ elseif ESX.GetConfig().Multichar == true then
 			end
 		end
 	end)
+
 
 	AddEventHandler('esx_identity:completedRegistration', function(source, data)
 		TriggerEvent('esx:onPlayerJoined', source, PREFIX..awaitingRegistration[source], data)
@@ -207,11 +212,50 @@ elseif ESX.GetConfig().Multichar == true then
 	end)
 
 	RegisterNetEvent('esx_multicharacter:DeleteCharacter', function(charid)
-		if Config.CanDelete and type(charid) == 'number' and string.len(charid) <= 2 then
+		if Config.action.delete and type(charid) == 'number' and string.len(charid) <= 2 then
 			DeleteCharacter(source, charid)
 		end
 	end)
 
-else
-	assert(nil, '^3WARNING: Multicharacter is disabled - please check your ESX configuration^0')
-end
+	if Config.action.SpawnSelect then
+		RegisterNetEvent('aer_3login_map:open', function(key, num)
+			if key == "L0vZboEil3" then
+				SetPlayerRoutingBucket(source, num)
+			end
+		end)
+
+
+		RegisterNetEvent('aer_3login_map:close', function(key)
+			if key == "L0vZboEil3" then
+				SetPlayerRoutingBucket(source, 0)
+			end
+		end)
+	end
+
+	RegisterNetEvent('aer_3login_map:foto', function(identifier, img)
+		MySQL.Async.fetchAll('UPDATE users SET image = @img  WHERE identifier = @id', {
+			['@img'] = img,
+			['@id'] = identifier
+		})
+	end)
+
+	if Config.commands.slots then
+		RegisterCommand("set_slots", function(source, user, args)
+			if user[1] == nil then Notifica(source, Config.locale["text_slots_id_none"], "error") return elseif user[2] == nil then Notifica(source, Config.locale["text_slots_slot_none"], "error") return elseif tonumber(user[2]) > 3 then Notifica(source, Config.locale["text_slots_slot_big"], "error") return end
+			MySQL.prepare('UPDATE `multicharacter_slots` SET `slots` = ? WHERE `identifier` = ?', {tonumber(user[2]), GetIdentifier(user[1]),})
+			Notifica(source, Config.locale["text_slots_slot_success"], "success")
+		end)
+	end
+
+
+	RegisterNetEvent('esx_multicharacter:relog', function(esci)
+		local source = source
+		TriggerEvent('esx:playerLogout', source)
+		if esci then 
+			DropPlayer(source, Config.locale["text_door_exit_nui"])
+		end
+	end)
+
+	else
+		assert(nil, '^3WARNING: Multicharacter is disabled - please check your ESX configuration^0')
+	end

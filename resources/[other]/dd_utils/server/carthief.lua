@@ -18,8 +18,6 @@ RegisterServerEvent("dd_thief:action", function(source, azione, other)
     end
 end)
 
---asdasdsda
-
 RegisterServerEvent("dd_thief:loadLocalClient", function(source)
     TriggerClientEvent("dd_thief:setValCLGlob", source, CountServerFurti, 1)
 end)

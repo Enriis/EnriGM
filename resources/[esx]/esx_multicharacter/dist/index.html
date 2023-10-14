@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Aer 3d Login</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+
+
+
+    <div class="ok" id = "ok"> 
+    <!-- partial:index.partial.html -->
+    <input type="checkbox" id="lightswitch" accesskey="l" />
+    <input type="checkbox" checked="checked" id="wall4" accesskey="x" />
+
+
+    <label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label>
+    <label class=""></label>
+
+    <label class="p1hover pointer"></label>
+    <label class=""></label>
+    <label></label>
+    <label class=""></label>
+    <label class="p2hover pointer"></label>
+    <label class=""></label>
+    <label></label>
+    <label class=""></label>
+    <label class="p3hover pointer"></label>
+    <label class=""></label>
+    <label class="pointer turn" for="wall4" title="Rotate right"></label>
+    <label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label><label></label>
+
+    <z>
+      <x>
+        <y>
+          <floor id ="testda"></floor>
+          <ceiling></ceiling>
+          <wall1>
+            <painting>
+              <button2 id = "button_si_1"><i class="fa fa-check" style="font-size: 100px; color:rgb(42, 252, 0); margin-left: 1vh; margin-top: 2vh;"></i></button2>  
+              <button2 id = "button_no_1"><i class="fa fa-trash" style="font-size: 100px; color:red; margin-left: 2vh; margin-top: 2vh;"></i></button2> 
+              <button2 id = "button_back_1"><i class="fa fa-arrow-left" style="font-size: 100px; color:rgb(253, 253, 253); margin-left: 2vh; margin-top: 2vh;"></i></button2> 
+              <img id = "personaggio_1_img" src="" />
+              <p id = "personaggio_1_text">               
+              </p>
+
+              <!--<p id = "personaggio_1_text">
+                ▫️ Giovanni Banana<br />
+                ▫️ Comandante Polizia<br />
+                <small>▫️ 15/10/1980</small>
+              </p>-->
+              
+          </wall1>
+          <wall2>
+            <painting>
+              <button2 id = "button_si_2"><i class="fa fa-check" style="font-size: 100px; color:rgb(42, 252, 0); margin-left: 1vh; margin-top: 2vh;"></i></button2>  
+              <button2 id = "button_no_2"><i class="fa fa-trash" style="font-size: 100px; color:red; margin-left: 2vh; margin-top: 2vh;"></i></button2> 
+              <button2 id = "button_back_2"><i class="fa fa-arrow-left" style="font-size: 100px; color:rgb(253, 253, 253); margin-left: 2vh; margin-top: 2vh;"></i></button2> 
+              <img id = "personaggio_2_img" src="" />
+              <p id = "personaggio_2_text">              
+              </p>
+              <!-- <p id = "personaggio_2_text">
+                ▫️ Giovanni Banana<br />
+                ▫️ Comandante Polizia<br />
+                <small>▫️ 15/10/1980</small>
+              </p> -->
+            </painting>
+          </wall2>
+          <wall3>
+            <painting>
+              <button2 id = "button_si_3"><i class="fa fa-check" style="font-size: 100px; color:rgb(42, 252, 0); margin-left: 1vh; margin-top: 2vh;"></i></button2>  
+              <button2 id = "button_no_3"><i class="fa fa-trash" style="font-size: 100px; color:red; margin-left: 2vh; margin-top: 2vh;"></i></button2> 
+              <button2 id = "button_back_3"><i class="fa fa-arrow-left" style="font-size: 100px; color:rgb(253, 253, 253); margin-left: 2vh; margin-top: 2vh;"></i></button2> 
+              <img id = "personaggio_3_img" src="" />
+              <p id = "personaggio_3_text">              
+              </p>
+              <!-- <p id = "personaggio_3_text">
+                ▫️ Giovanni Banana<br />
+                ▫️ Comandante Polizia<br />
+                <small>▫️ 15/10/1980</small>
+              </p> -->
+            </painting>
+          </wall3>
+          <wall4>
+
+            <notice>
+
+              <a id="infotasto" title="Discord Server" target="_blank">Info</a>
+              <!-- <a title="Buy the still life - CSS Art for your wall!" target="_blank" href="https://www.redbubble.com/i/canvas-print/Pure-CSS-Still-Life-Water-and-Lemons-by-Ivorjetski/48862524.4ZB30">Buy the still life</a>
+              <a title="Buy the portrait - CSS Art for your wall!" target="_blank" href="https://www.redbubble.com/i/framed-print/Pure-CSS-Portrait-Isla-by-Ivorjetski/48862324.16RW4">Buy the portrait</a> -->
+            </notice>
+            <door>
+              <a target="_blank" title="Exit" id ="exit_porta">
+              </a>
+            </door>
+
+            <label for="lightswitch" class="pointer" title="Switch"></label>
+            <fireexit>
+              <i></i>
+              <i></i>
+            </fireexit>
+          </wall4>
+        </y>
+      </x>
+    </z>
+
+    <label class="turnback" title="Rotate left" for="wall4"></label>
+    <!-- partial -->
+
+      <div id= "toggle_load" class="load">
+        <div id="loading"></div>
+      </div>
+      <div id= "info2" class="info">
+        <p id="info">1) In caso lo script non vada o c'è qualche errore contattare l'assistenza sul discord</p>
+        <button id="info3"><svg xmlns="http://www.w3.org/2000/svg" height="1.8em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg></button>
+      </div>
+    </div>
+    <div class="map" id = "map"> 
+      <h1 id="home" class="title">SPAWN SELECTOR</h1>
+
+      <div class="bc"></div>
+    
+      <div class="boxkaros">
+        <div class="sandy box" onclick="selectSandy()">
+          <h1 id="sandy" class="title2">Sandy</h1>
+        </div>
+      </div>
+    
+      <div class="boxkaros2">
+        <div class="police box" onclick="selectPolice()">
+          <h1 id="police" class="title2">Police</h1>
+        </div>
+      </div>
+    
+      <div class="boxkaros3">
+        <div class="airport box" onclick="selectAirport()">
+          <h1 id="airport" class="title2">Airport</h1>
+        </div>
+      </div>
+    
+      <div class="boxkaros4">
+        <div class="paleto box" onclick="selectPaleto()">
+          <h1 id="paleto" class="title2">Paleto</h1>
+        </div>
+      </div>
+    
+    
+      <div class="boxkaros5">
+        <div class="spawn box" onclick="selectSpawn()">
+          <h1 id="last" class="title2">Last Position</h1>
+        </div>
+      </div>
+    </div>
+
+    <script  src="./script.js"></script>
+
+  </body>
+</html>

@@ -1,18 +1,24 @@
 fx_version 'cerulean'
 game 'gta5'
 author 'ESX-Framework - Linden - KASH'
-description 'Redesign by JGUsman#5140'
-version '1.8.5'
+description 'Official Multicharacter System For ESX Legacy'
+version '1.9.0'
 lua54 'yes'
 
-dependencies {'es_extended', 'esx_menu_default', 'esx_identity', 'esx_skin'}
+dependencies {'es_extended', 'esx_identity', 'esx_skin'}
 
-shared_scripts {'@es_extended/imports.lua', '@es_extended/locale.lua', 'locales/*.lua', 'config.lua', '@ox_lib/init.lua'}
+shared_scripts {'@es_extended/imports.lua', 'config.lua', 'src/shared.lua'}
 
-server_scripts {'@oxmysql/lib/MySQL.lua', 'server/*.lua'}
+server_scripts {'@oxmysql/lib/MySQL.lua', 'src/server/*.lua'}
 
-client_scripts {'client/*.lua'}
+client_scripts {'src/client/*.lua'}
 
-ui_page {'html/ui.html'}
+ui_page 'dist/index.html'
 
-files {'html/ui.html', 'html/css/main.css', 'html/js/app.js', 'html/locales/*.js'}
+files {
+    'dist/*.js',
+    'dist/*.html',
+    'dist/*.css'
+}
+
+export 'foto'
