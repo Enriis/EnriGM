@@ -92,6 +92,16 @@ return {
 		weight = 160,
 	},
 
+	['documento'] = {
+		label = "Carta d'identita",
+		weight = 160,
+	},
+
+	['patente'] = {
+		label = "Carta di circolazione",
+		weight = 160,
+	},
+
 	['phone'] = {
 		label = 'Phone',
 		weight = 190,
