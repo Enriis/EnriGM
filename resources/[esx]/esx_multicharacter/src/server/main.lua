@@ -218,34 +218,26 @@ elseif ESX.GetConfig().Multichar == true then
 	end)
 
 	if Config.action.SpawnSelect then
-		RegisterNetEvent('aer_3login_map:open', function(key, num)
+		RegisterNetEvent('dd_login_map:open', function(key, num)
 			if key == "L0vZboEil3" then
 				SetPlayerRoutingBucket(source, num)
 			end
 		end)
 
 
-		RegisterNetEvent('aer_3login_map:close', function(key)
+		RegisterNetEvent('dd_login_map:close', function(key)
 			if key == "L0vZboEil3" then
 				SetPlayerRoutingBucket(source, 0)
 			end
 		end)
 	end
 
-	RegisterNetEvent('aer_3login_map:foto', function(identifier, img)
+	RegisterNetEvent('dd_login_map:foto', function(identifier, img)
 		MySQL.Async.fetchAll('UPDATE users SET image = @img  WHERE identifier = @id', {
 			['@img'] = img,
 			['@id'] = identifier
 		})
 	end)
-
-	if Config.commands.slots then
-		RegisterCommand("set_slots", function(source, user, args)
-			if user[1] == nil then Notifica(source, Config.locale["text_slots_id_none"], "error") return elseif user[2] == nil then Notifica(source, Config.locale["text_slots_slot_none"], "error") return elseif tonumber(user[2]) > 3 then Notifica(source, Config.locale["text_slots_slot_big"], "error") return end
-			MySQL.prepare('UPDATE `multicharacter_slots` SET `slots` = ? WHERE `identifier` = ?', {tonumber(user[2]), GetIdentifier(user[1]),})
-			Notifica(source, Config.locale["text_slots_slot_success"], "success")
-		end)
-	end
 
 
 	RegisterNetEvent('esx_multicharacter:relog', function(esci)
@@ -256,6 +248,6 @@ elseif ESX.GetConfig().Multichar == true then
 		end
 	end)
 
-	else
-		assert(nil, '^3WARNING: Multicharacter is disabled - please check your ESX configuration^0')
-	end
+else
+	assert(nil, '^3WARNING: Multicharacter is disabled - please check your ESX configuration^0')
+end

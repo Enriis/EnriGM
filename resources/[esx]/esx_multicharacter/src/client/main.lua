@@ -341,17 +341,17 @@ if ESX.GetConfig().Multichar then
 		TriggerEvent('esx_skin:resetFirstSpawn')
 	end)
 
-	if Config.commands.relog then
-		RegisterCommand('relog', function(source, args, rawCommand)
-			TriggerServerEvent('esx_multicharacter:relog')
-		end)
-	end
+	-- if Config.commands.relog then
+	-- 	RegisterCommand('relog', function(source, args, rawCommand)
+	-- 		TriggerServerEvent('esx_multicharacter:relog')
+	-- 	end)
+	-- end
 	cam = nil
 	lastcoords= nil
 	function foto()
 		--print("FACCIO LA FOTO", ESX.PlayerData.coords)
 		lastcoords = GetEntityCoords(PlayerPedId())
-		TriggerServerEvent("aer_3login_map:open", "L0vZboEil3", math.random(5,100))
+		TriggerServerEvent("dd_login_map:open", "L0vZboEil3", math.random(5,100))
 		defaultCamPos = vector3(-269.39846801758,-955.30096435547,31.211368560791)
 		SetEntityCoords(PlayerPedId(), defaultCamPos)
 		SetEntityHeading(PlayerPedId(), 205.8000030517578)
@@ -379,7 +379,7 @@ if ESX.GetConfig().Multichar then
 		Wait(500)
 		exports['screenshot-basic']:requestScreenshotUpload('https://discord.com/api/webhooks/1162704205761486848/djALzxKrVmmH35tIRxZeT6dc_fkqURLKAC6vN6EgVCIFpJY2vMImdq9wRjLJOJYdgd5S', 'files[]', function(data)
 			local resp = json.decode(data)
-			TriggerServerEvent("aer_3login_map:foto", ESX.GetPlayerData().identifier, resp.attachments[1].proxy_url)
+			TriggerServerEvent("dd_login_map:foto", ESX.GetPlayerData().identifier, resp.attachments[1].proxy_url)
 		end)
 		ESX.ShowNotification(Config.locale["notification_photo"])
 		Wait(3000)
@@ -391,7 +391,7 @@ if ESX.GetConfig().Multichar then
 		end
 		Wait(800)
 		ExecuteCommand("kit")
-		TriggerServerEvent("aer_3login_map:close", "L0vZboEil3")
+		TriggerServerEvent("dd_login_map:close", "L0vZboEil3")
 		lastcoords = nil
 	end
 end
@@ -405,7 +405,7 @@ if Config.action.SpawnSelect then
 
 
 	function SpawnPlayer(x, y, z)
-		TriggerServerEvent("aer_3login_map:close", "L0vZboEil3")
+		TriggerServerEvent("dd_login_map:close", "L0vZboEil3")
 		local pos = GetEntityCoords(PlayerPedId())
 		local cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", x, y, z + 200.0, 270.00, 0.00, 0.00, 80.00, 0, 0)
 
@@ -433,7 +433,7 @@ if Config.action.SpawnSelect then
 	end
 
 	function openSpawnSelector()
-		TriggerServerEvent("aer_3login_map:open", "L0vZboEil3", math.random(5,100))
+		TriggerServerEvent("dd_login_map:open", "L0vZboEil3", math.random(5,100))
 		SendNUIMessage({
 			type = "openSpawnSelector",
 		})
@@ -487,3 +487,27 @@ if Config.action.SpawnSelect then
 		end
 	end)
 end
+
+
+-- RegisterCommand("addSlot", function(source, args)
+-- 	if LocalPlayer.state.infoPl.staff == "admin" or LocalPlayer.state.infoPl.staff == "big" then
+-- 		local xPlayer = ESX.GetPlayerFromId(source)
+-- 		local tPlayer = ESX.GetPlayerFromId(args[1])
+-- 		if tPlayer then
+-- 			local addSlot = tonumber(args[2]) 
+-- 			if addSlot then
+-- 				if addSlot > 3 then return end
+-- 				if addSlot < 1 then return end
+-- 				MySQL.Async.fetchAll('UPDATE multicharacter_slots SET slots = @slots  WHERE identifier = @id', {
+-- 					['@slots'] = addSlot,
+-- 					['@id'] = identifier
+-- 				})
+-- 				xPlayer.showNotification("Hai aggiornato gli slot a: "..addSlot.." al iocatore: "..tPlayer.getName())
+-- 			end
+-- 		else
+-- 			xPlayer.showNotification("Il giocatore non è online")
+-- 		end
+-- 	else
+-- 		xPlayer.showNotification("Non hai abbastanza permessi") 
+-- 	end
+-- end)

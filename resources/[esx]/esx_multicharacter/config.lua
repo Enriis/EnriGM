@@ -1,10 +1,10 @@
 Config = {
 
-	commands = {
-		slots = true,
-		delete = false, -- da fare
-		relog = true
-	},
+	-- commands = {
+	-- 	slots = true,
+	-- 	delete = false, -- da fare
+	-- 	relog = true
+	-- },
 
 	action = {
 		delete = true,
