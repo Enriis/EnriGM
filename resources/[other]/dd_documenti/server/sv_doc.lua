@@ -36,7 +36,7 @@ RegisterServerEvent('dd_doc:daiDoc',function(source, link)
         metadata.sesso = res[1].sex
         metadata.alt = res[1].height
         metadata.linkImg = link
-        metadata.type = 'di '..res[1].firstname.. " "..res[1].lastname
+        metadata.type = ' di '..res[1].firstname.. " "..res[1].lastname
         ox:AddItem(xPlayer.source, Documenti.NomeItem, 1, metadata)
     end)
 end)
@@ -58,7 +58,7 @@ RegisterServerEvent('dd_doc:daiDocCustom',function(source, nomeItem, png)
         else
             metadata.linkImg = res[1].immagine
         end
-        metadata.type = 'di '..res[1].firstname.. " "..res[1].lastname
+        metadata.type = ' di '..res[1].firstname.. " "..res[1].lastname
         ox:AddItem(xPlayer.source, nomeItem, 1, metadata)
     end)
 end)
@@ -80,7 +80,7 @@ RegisterServerEvent('dd_doc:daiDocToTarget',function(target, png)
             metadata.alt = res[1].height
             metadata.linkImg = png
 
-            metadata.type = 'di '..res[1].firstname.. " "..res[1].lastname
+            metadata.type = ' di '..res[1].firstname.. " "..res[1].lastname
             xPlayer.showNotification("Hai scattato la foto per i documenti a "..xPlayer.getName())
             xT.showNotification("Hai ricevuto i documenti")
             ox:AddItem(xT.source, Documenti.NomeItem, 1, metadata)
@@ -117,7 +117,7 @@ RegisterServerEvent(Documenti.DmvTrigger,function(source, tipo, img)
         else
             metadata.linkImg = res[1].immagine
         end
-        metadata.type = 'di '..res[1].firstname.. " "..res[1].lastname
+        metadata.type = ' di '..res[1].firstname.. " "..res[1].lastname
         if tipo == "drive" then
             metadata.drive = true
         elseif tipo == "drive_bike" then

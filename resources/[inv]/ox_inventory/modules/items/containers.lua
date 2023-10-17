@@ -69,5 +69,10 @@ setContainerProperties('phone', {
 	whitelist = { 'sim' }
 })
 
+setContainerProperties('portafoglio', {
+	slots = 5,
+	maxWeight = 1500,
+	whitelist = { 'patente', "documento", "money" }
+})
 
 return containers
