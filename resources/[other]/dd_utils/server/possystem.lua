@@ -1,5 +1,10 @@
 ESX.RegisterUsableItem("pos", function(source, cb, extra)
-    TriggerClientEvent("dd_pos:scegliGiocatore", source)
+    --TriggerClientEvent("dd_pos:scegliGiocatore", source)
+    TriggerClientEvent("dd_pos:apriMenuCarte_Cl", source, 10000, "asdsd asdasd asdas", "police")
+end)
+
+RegisterServerEvent("dd_pos:apriMenuCarte", function(source, id, importo, motivo, soc)
+    TriggerClientEvent("dd_pos:apriMenuCarte_Cl", id, importo, motivo, soc)
 end)
 
 ESX.RegisterServerCallback("dd_pos:getCard", function(source, cb)
@@ -20,4 +25,9 @@ ESX.RegisterServerCallback("dd_pos:getCard", function(source, cb)
         array[metass.namebk] = metass
     end
     cb(array)
+end)
+
+RegisterServerEvent("dd_pos:paga", function(source, iban, importo, motivo, soc)
+    
+
 end)
