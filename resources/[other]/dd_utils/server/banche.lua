@@ -178,6 +178,7 @@ RegisterServerEvent("en_bank:createAccount", function(source, bank, tasse, grado
     local data_banca = json.decode(banca or '{}')
     local identifier = xPlayer.getIdentifier()
     local iban = GenerateIBAN(source, label)
+    local metadata = {}
     if not data_banca[identifier] then
         data_banca[identifier] = {
             [bank] = {
@@ -207,6 +208,15 @@ RegisterServerEvent("en_bank:createAccount", function(source, bank, tasse, grado
         xPlayer.showNotification("Conto creato con successo presso la banca: "..label, "success") 
         EditJsonBanca("add", bank, tasse)
     end
+
+    metadata.iban = iban
+    metadata.nome = xPlayer.getName()
+    metadata.pin = pinn
+    metadata.type = label.." - "..iban
+    metadata.banca = label
+    metadata.namebk = bank
+    exports.ox_inventory:AddItem(source, "cr"..bank, 1, metadata)
+
 end)
 
 RegisterServerEvent("en_bank:azioni", function(azione, source, data, extra)

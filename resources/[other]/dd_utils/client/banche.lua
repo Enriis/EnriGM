@@ -44,6 +44,7 @@ function Banca(nome, grado, tasse, label)
             if verifica == 'crea' then
 
                 ESX.TriggerServerCallback("dd_utils:getAccount", function(returnss) 
+                    print(returnss.money, tasse)
                     if tonumber(returnss.money) >= tonumber(tasse) then 
                         local input = lib.inputDialog('Creazione Conto', {
                             {type = 'number', label = 'Pin Conto', description = 'Pin per accesso al conto'}
