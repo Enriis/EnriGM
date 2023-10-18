@@ -16,9 +16,10 @@ RegisterNetEvent("dd_pos:scegliGiocatore", function()
 end)
 
 
-RegisterNetEvent("dd_pos:apriMenuCarte_Cl", function(importo, motivo, soc)
+RegisterNetEvent("dd_pos:apriMenuCarte_Cl", function(importo, motivo, soc, idPl)
     ESX.TriggerServerCallback("dd_pos:getCard", function(result)
         local info = {}
+        if not next(result) then ESX.ShowNotification("Non hai carte con te") return end
         for k,v in pairs(result) do
             table.insert(info, {label = v.banca, value = v.namebk})
         end
@@ -26,7 +27,7 @@ RegisterNetEvent("dd_pos:apriMenuCarte_Cl", function(importo, motivo, soc)
             { type = 'select', label = 'Seleziona Carta', required = true,
                 options = info
             },
-            { type = "number", label = "Inserisci il pin", required = true },
+            { type = "input", label = "Inserisci il pin", required = true,  password = true},
             { type = "textarea", label = "Informazioni Transazione", placeholder = " Importo: "..importo.."$\n Info: "..motivo, disabled = true},
         })
 
@@ -34,8 +35,8 @@ RegisterNetEvent("dd_pos:apriMenuCarte_Cl", function(importo, motivo, soc)
         local inputpin = input[2]
         local iban = result[bank].iban
         local pin = result[bank].pin
-        if inputpin == tonumber(pin) then
-            TriggerServerEvent("dd_pos:paga", GetPlayerServerId(PlayerId()), iban, importo, motivo, soc)
+        if tonumber(inputpin) == tonumber(pin) then
+            TriggerServerEvent("dd_pos:paga", GetPlayerServerId(PlayerId()), iban, importo, motivo, soc, idPl)
         else
             ESX.ShowNotification("Il pin inserito non è corretto", "error")
 

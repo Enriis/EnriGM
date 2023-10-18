@@ -4,7 +4,7 @@ ESX.RegisterUsableItem("pos", function(source, cb, extra)
 end)
 
 RegisterServerEvent("dd_pos:apriMenuCarte", function(source, id, importo, motivo, soc)
-    TriggerClientEvent("dd_pos:apriMenuCarte_Cl", id, importo, motivo, soc)
+    TriggerClientEvent("dd_pos:apriMenuCarte_Cl", id, importo, motivo, soc, source)
 end)
 
 ESX.RegisterServerCallback("dd_pos:getCard", function(source, cb)
@@ -27,7 +27,7 @@ ESX.RegisterServerCallback("dd_pos:getCard", function(source, cb)
     cb(array)
 end)
 
-RegisterServerEvent("dd_pos:paga", function(source, iban, importo, motivo, soc)
-    
+RegisterServerEvent("dd_pos:paga", function(source, iban, importo, motivo, soc, idPl)
+
 
 end)

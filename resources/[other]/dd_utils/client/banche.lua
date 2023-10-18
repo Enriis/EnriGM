@@ -73,12 +73,10 @@ function Banca(nome, grado, tasse, label)
                     print("Test furto acc credenziali rubate") -- Sviluppare alla fine 
                 end
                 local input = lib.inputDialog('Accesso Conto', {
-                    {type = 'number', label = 'Pin Conto', description = 'Pin per l\'accesso al conto'}
+                    {type = 'number', label = 'Pin Conto', description = 'Pin per l\'accesso al conto', required = true}
                 })
-
-                if not input[1] then ESX.ShowNotification("Non puoi lasciare il campo vuoto") 
-                    return 
-                elseif tonumber(input[1]) ~= tonumber(result.pin) then 
+                
+                if tonumber(input[1]) ~= tonumber(result.pin) then 
                     ESX.ShowNotification("Il pin non è corretto") 
                     tentativi = tentativi + 1 
                 else
