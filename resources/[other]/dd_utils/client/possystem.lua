@@ -37,6 +37,7 @@ RegisterNetEvent("dd_pos:scegliGiocatore", function()
         end
     end)
 
+        
 
     -- getMousePlayer(function(closestPlayer, closestDistance)
     --     if (closestPlayer and closestDistance) and ((closestPlayer ~= -1) and (closestDistance > 0 and closestDistance <= 3.0)) then
