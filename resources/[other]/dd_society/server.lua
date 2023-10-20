@@ -233,3 +233,10 @@ ESX.RegisterServerCallback("dd_society:getBills", function(source, cb)
     local identifier = xPlayer.getIdentifier()
     cb(data_fatture[identifier])
 end)
+
+
+RegisterServerEvent("dd_soc:posSystem", function(job, val)
+    local money = ReturnSocietyAccount(job, "saldo")
+    local SaldoAggSoc2 = tonumber(money + tonumber(val))
+    SetSocietyAccount(job, "saldo", SaldoAggSoc2)
+end)

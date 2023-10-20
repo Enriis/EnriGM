@@ -56,13 +56,17 @@ function PrestitiDelateAccount(source, importo, banca)
     end
 end
 
-function EditMoneyIBAN(iban, moneyAgg)
+function EditMoneyIBAN(iban, tpyes, moneyAgg)
     local banca = LoadResourceFile(GetCurrentResourceName(), "json/bancapl.json")
     local data_banca = json.decode(banca or '{}')
     for k,v in pairs(data_banca) do 
         for e,n in pairs(v) do
             if n["iban"] == iban then
-                n["money"] = n["money"] + moneyAgg
+                if tpyes == "add" then
+                    n["money"] = n["money"] + moneyAgg
+                elseif tpyes == "rem" then
+                    n["money"] = n["money"] - moneyAgg
+                end
                 SaveResourceFile(GetCurrentResourceName(), "json/bancapl.json", json.encode(data_banca, {indent = true}), -1)
                 return
             end
@@ -257,7 +261,7 @@ RegisterServerEvent("en_bank:azioni", function(azione, source, data, extra)
             xPlayer.showNotification("Hai trasferito: "..importo.."$ all'iban: "..ibanTras, "success")
             local impAgg = tonumber(saldo) - tonumber(importo)
             AggMoneyBankPL(xPlayer.getIdentifier(), banca, impAgg)
-            EditMoneyIBAN(ibanTras, importo)
+            EditMoneyIBAN(ibanTras, "add", importo)
         else
             xPlayer.showNotification("Importo superiore al saldo disponibile", "error")
         end

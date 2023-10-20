@@ -1,6 +1,6 @@
 ESX.RegisterUsableItem("pos", function(source, cb, extra)
     --TriggerClientEvent("dd_pos:scegliGiocatore", source)
-    TriggerClientEvent("dd_pos:apriMenuCarte_Cl", source, 10000, "asdsd asdasd asdas", "police")
+    TriggerClientEvent("dd_pos:apriMenuCarte_Cl", source, 10000, "Menu 5x - 3x", "police", source)
 end)
 
 RegisterServerEvent("dd_pos:apriMenuCarte", function(source, id, importo, motivo, soc)
@@ -27,7 +27,27 @@ ESX.RegisterServerCallback("dd_pos:getCard", function(source, cb)
     cb(array)
 end)
 
-RegisterServerEvent("dd_pos:paga", function(source, iban, importo, motivo, soc, idPl)
+RegisterServerEvent("dd_pos:paga", function(source, iban, bank, importo, motivo, soc, idPl, LabelBank)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local zTarget = ESX.GetPlayerFromId(idPl)
+    local PlMoney = GetMoneyBankPL(xPlayer.getIdentifier(), bank)
+    if tonumber(PlMoney) >= tonumber(importo) then
+        EditMoneyIBAN(iban, "rem", importo)
+        xPlayer.showNotification("Hai pagato "..importo.."$ per "..motivo.." da "..LabelBank, "success")
+        zTarget.showNotification("Transazione approvata da "..importo.."$ per "..motivo, "success")
+        TriggerEvent("dd_soc:posSystem", soc, importo)
+    else
+        xPlayer.showNotification("Non hai abbastanza soldi su questo conto", "error")
+        zTarget.showNotification("Transazione NEGATA, Saldo insuffiscente", "error")
+    end
+end)
 
-
+RegisterServerEvent("dd_pos:alert", function(source, target, tipo)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local zTarget = ESX.GetPlayerFromId(target)
+    if tipo == "nocr" then
+        xPlayer.showNotification("Il giocatore: "..zTarget.getName().." non ha carte con se")
+    elseif tipo == "pinerr" then
+        xPlayer.showNotification("Il pin inserito dal giocatore non è corretto")
+    end
 end)

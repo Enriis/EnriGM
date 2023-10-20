@@ -19,7 +19,7 @@ end)
 RegisterNetEvent("dd_pos:apriMenuCarte_Cl", function(importo, motivo, soc, idPl)
     ESX.TriggerServerCallback("dd_pos:getCard", function(result)
         local info = {}
-        if not next(result) then ESX.ShowNotification("Non hai carte con te") return end
+        if not next(result) then ESX.ShowNotification("Non hai carte con te") TriggerServerEvent("dd_pos:alert", idPl, GetPlayerServerId(PlayerId()), "nocr") return end
         for k,v in pairs(result) do
             table.insert(info, {label = v.banca, value = v.namebk})
         end
@@ -35,11 +35,12 @@ RegisterNetEvent("dd_pos:apriMenuCarte_Cl", function(importo, motivo, soc, idPl)
         local inputpin = input[2]
         local iban = result[bank].iban
         local pin = result[bank].pin
+        local LabelBank = result[bank].banca
         if tonumber(inputpin) == tonumber(pin) then
-            TriggerServerEvent("dd_pos:paga", GetPlayerServerId(PlayerId()), iban, importo, motivo, soc, idPl)
+            TriggerServerEvent("dd_pos:paga", GetPlayerServerId(PlayerId()), iban, bank, importo, motivo, soc, idPl, LabelBank)
         else
             ESX.ShowNotification("Il pin inserito non è corretto", "error")
-
+            TriggerServerEvent("dd_pos:alert", idPl, GetPlayerServerId(PlayerId()), "pinerr")
         end
     end)
 end)
