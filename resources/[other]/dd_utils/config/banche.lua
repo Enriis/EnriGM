@@ -1,6 +1,22 @@
 ConfigBanche = { 
     ["fleeca"] =  {
-        pos = vector3(1007.7835083008,-454.07388305664,63.941902160645),
+        pos = vector3(149.9292755127,-1040.5068359375,29.374082565308),
+        label = "Fleeca Bank",
+        grado = 2,
+        tasse = 10000,
+        fondo = 2000000
+    },
+
+    ["fleeca"] =  {
+        pos = vector3(-350.76010131836,-49.721199035645,49.042545318604),
+        label = "Fleeca Bank",
+        grado = 2,
+        tasse = 10000,
+        fondo = 2000000
+    },
+
+    ["fleeca"] =  {
+        pos = vector3(-1212.8582763672,-330.38061523438,37.787010192871),
         label = "Fleeca Bank",
         grado = 2,
         tasse = 10000,
@@ -8,7 +24,7 @@ ConfigBanche = {
     },
 
     ["pacific"] =  {
-        pos = vector3(1007.1968994141,453.98190307617,95.001609802246),
+        pos = vector3(241.15406799316,224.94673156738,106.28676605225),
         label = "Pacific Bank",
         grado = 0,
         tasse = 85000,

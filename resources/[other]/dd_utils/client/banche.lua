@@ -2,9 +2,10 @@ local tentativi = 0
 
 Citizen.CreateThread(function()
     for k,v in pairs(ConfigBanche) do 
+        local random = math.random(111111,999999)
         CreaBlips(v.label, 108, 2, v.pos, 0.8)
         TriggerEvent('gridsystem:registerMarker', {
-            name = 'blip_container_'..k,
+            name = 'blip_container_'..k..'-'..random,
             type = 23,
             texture = nil,
             scale = vector3(0.8,0.8,0.8),
@@ -47,10 +48,9 @@ function Banca(nome, grado, tasse, label)
                     print(returnss.money, tasse)
                     if tonumber(returnss.money) >= tonumber(tasse) then 
                         local input = lib.inputDialog('Creazione Conto', {
-                            {type = 'number', label = 'Pin Conto', description = 'Pin per accesso al conto'}
+                            {type = 'input', label = 'Pin Conto', description = 'Pin per accesso al conto', required = true, password = true}
                         })
-
-                        if not input[1] then ESX.ShowNotification("Non puoi lasciare il campo vuoto") return else pin = tonumber(input[1]) end
+                        if not next(input) then ESX.ShowNotification("Non puoi lasciare il campo vuoto") return else pin = tonumber(input[1]) end
                         TriggerServerEvent("en_bank:createAccount", GetPlayerServerId(PlayerId()), nome, tasse, grado, label, pin)
                         ESX.UI.Menu.CloseAll()
                     else
@@ -73,7 +73,7 @@ function Banca(nome, grado, tasse, label)
                     print("Test furto acc credenziali rubate") -- Sviluppare alla fine 
                 end
                 local input = lib.inputDialog('Accesso Conto', {
-                    {type = 'number', label = 'Pin Conto', description = 'Pin per l\'accesso al conto', required = true}
+                    {type = 'input', label = 'Pin Conto', description = 'Pin per l\'accesso al conto', required = true, password = true}
                 })
                 
                 if tonumber(input[1]) ~= tonumber(result.pin) then 
