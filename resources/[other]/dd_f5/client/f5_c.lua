@@ -120,8 +120,8 @@ DD.BankAccountSubMenu = function(banca, info)
        align = 'top-left',
        elements = {
             {label = 'IBAN: '..info.iban, value = info.money},
-            {label = 'Saldo: '..info.money.."$", value = info.money},
-            {label = 'Pin: '..info.pin, value = info.pin}
+            {label = 'Saldo: '..info.money.."$", value = info.money}
+            --{label = 'Pin: '..info.pin, value = info.pin}
        }
     },  function(data, menu)
         local verifica = data.current.value
