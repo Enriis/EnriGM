@@ -18,8 +18,7 @@ function StartaRapina(rap)
     else
         PlTentativi = PlTentativi + 1
     end
-end  
-
+end
 local function ControlloRapina(rapina)
     if PlTentativi > 3 then return end
     -- local arma, hash = GetCurrentPedWeapon(PlayerPedId())
