@@ -9,18 +9,10 @@ ConfigJobCenter = {
     },
 
     ["Job Center 2"] = {
-        pos = vector3(0,0,0),
+        pos = vector3(-355.03717041016,-1514.0333251953,27.717380523682),
         lavori = {
-            'pescatore',
-            'cacciatore'
-        }
-    },
-
-    ["Job Center 3"] = {
-        pos = vector3(0,0,0),
-        lavori = {
-            'netturbino',
-            'camionista'
+            'Netturbino',
+            'Camionista'
         }
     }
 }

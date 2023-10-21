@@ -1,33 +1,47 @@
+local PlTentativi = 0
+
 function StartaRapina(rap)
+    if PlTentativi > 3 then 
+        ESX.ShowNotification("Tentativi superati, allarme scattata", "success")
+        SetTimeout(60000, function()
+            PlTentativi = 0
+        end)
+        return
+    end
     local LabelRap = rap.label
     local CoordsRap = rap.coords
     local TimeRap = rap.time
-    SetTimeout(TimeRap * 1000, function()
-        print("lol")
-    end)
+    local success = lib.skillCheck({'easy', 'medium', {areaSize = 60, speedMultiplier = 1.5}, 'hard'}, {'w', 'a', 's', 'd'})
+    print(success)
+    if success then
+
+    else
+        PlTentativi = PlTentativi + 1
+    end
 end
 
 local function ControlloRapina(rapina)
-    local arma, hash = GetCurrentPedWeapon(PlayerPedId())
-    local ListHash = { -- Aggiornare lista
-        453432689,
-        -1075685676,
-        1593441988,
+    if PlTentativi > 3 then return end
+    -- local arma, hash = GetCurrentPedWeapon(PlayerPedId())
+    -- local ListHash = { -- Aggiornare lista
+    --     453432689,
+    --     -1075685676,
+    --     1593441988,
         
-    }
-    for k,v in pairs(ListHash) do
-        if hash == v then
-            local count = GlobalState.lavori["police"] 
-            if count == nil then
-                count = 0 
-            end
-            if tonumber(count) >= rapina.cops then
+    -- }
+    -- for k,v in pairs(ListHash) do
+        -- if hash == v then
+            -- local count = GlobalState.lavori["police"] 
+            -- if count == nil then
+            --     count = 0 
+            -- end
+            -- if tonumber(count) >= rapina.cops then
                 StartaRapina(rapina)
-            else
-                ESX.ShowNotification("Non c'e abbastanza polizia in servizio")
-            end
-        end
-    end
+            -- else
+            --     ESX.ShowNotification("Non c'e abbastanza polizia in servizio")
+            -- end
+        -- end
+    -- end
 end
 
 

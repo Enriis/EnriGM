@@ -11,9 +11,13 @@ local function ApriListaLavori(jobs)
         local verifica = data.current.value
 
         if verifica == 'Minatore' then
-            print("m")
+            FreezeEntityPosition(PlayerPedId(), true)
+            ExecuteCommand("e shakeoff")
+            Wait(3500)
+            FreezeEntityPosition(PlayerPedId(), false)
         elseif verifica == 'Falegname' then
-            print("f")
+        elseif verifica == 'Netturbino' then
+        elseif verifica == 'Camionista' then
         end
 
         end, 
