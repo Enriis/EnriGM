@@ -216,6 +216,7 @@ function StopFurtoExitCar()
     TriggerServerEvent("dd_thief:action", GetPlayerServerId(PlayerId()), "remFurto")
 end
 
+
 function CreatePosEndFurto()
     local random = math.random(1,8)
     local posEndCar = ConfigCarthief["EndCar"][random]
