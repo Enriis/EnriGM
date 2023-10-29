@@ -110,7 +110,7 @@ function GeneraVeicolo()
             FreezeEntityPosition(PlayerPedId(), true)
             StartVehicleAlarm(veicolospawnato)
             if lib.progressCircle({
-                duration = 12800,
+                duration = 14800,
                 position = 'bottom',
                 useWhileDead = false,
                 canCancel = false,
@@ -228,15 +228,26 @@ function CreatePosEndFurto()
         texture = nil,
         scale = vec3(3.8,3.8,3.8),
         color = { r = 255, g = 0, b = 0 },
-        pos = vector3(posEndCar.x, posEndCar.y, posEndCar.z),
+        pos = vector3(posEndCar.x, posEndCar.y, posEndCar.z-1),
         control = 'E',
         posizione = "left-center",
         titolo = "Consegna il veicolo",
         action = function()
             if IsPedSittingInAnyVehicle(PlayerPedId()) then
                 local veicoloinuso = GetVehiclePedIsUsing(PlayerPedId())
+                local vitaVeicolo = GetEntityHealth(veicolospawnato)
                 local modello = GetEntityModel(veicoloinuso)
                 local modvei = GetDisplayNameFromVehicleModel(modello)
+                if ConfigCarthief.debug then
+                    print("Vita Veicolo: "..vitaVeicolo)
+                end
+                if vitaVeicolo > 850 then
+                    --ottimo
+                elseif vitaVeicolo > 450 then
+                    --discreto
+                elseif vitaVeicolo >= 0  then
+                    --merda
+                end
                 if modvei == FurtoScelto.car then 
                     DeleteVehicle(veicolospawnato)
                     ESX.ShowNotification("Hai consegnato il veicolo, il tuo compenso è di: "..adssda.." $")
