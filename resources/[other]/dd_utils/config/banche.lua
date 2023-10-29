@@ -32,17 +32,19 @@ ConfigBanche = {
     }
 }
 
-ConfigPrestiti = {
-    giorni = 14
-}
 
-ConfigImpostazioniBanca = {
-    lavoro = false,
-    black = vector3(-2222.5639648438,304.18725585938,174.60188293457),
-    tentativi = 2,
-    jobPolizia = "police",
-    notification = "df_alert"
-}
+-- DA FARE
+-- ConfigPrestiti = { 
+--     giorni = 14
+-- }
+
+-- ConfigImpostazioniBanca = {
+--     lavoro = false,
+--     black = vector3(-2222.5639648438,304.18725585938,174.60188293457),
+--     tentativi = 2,
+--     jobPolizia = "police",
+--     notification = "df_alert"
+-- }
 
 --[[
     Gradi 
@@ -54,21 +56,8 @@ ConfigImpostazioniBanca = {
 ]]
 
 --[[
-    grado = rischio per investimenti, 
-    tasse = tasse apertura conto,
-    fondo = saldo disponibile per presiti ecc 
-]]
-
---[[
     CLIENT SIDE
-
-    -- Rivistare sistema fatture e adattarlo a questo tipo di banche
-    
-    -- Decidere se limitare le crazioni di conti
-
     -- Aggiungere reciclaggio tramite banca
-
-    -- Decidere se sviluppare tutto in un unico menu 
 
 ]]
 
@@ -81,7 +70,7 @@ ConfigImpostazioniBanca = {
     -   Capire che informazioni comunicare
     -   Login tramite iban e pin
     -   In caso di infomazioni corrette aprire menu default azioni
-    -   Limitare i prelievi al 20§ del saldo del conto, giornalmente
+    -   Limitare i prelievi al 20% del saldo del conto, giornalmente
     -   Sistam log discord webook 
 
 ]]

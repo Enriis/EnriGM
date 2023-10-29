@@ -1,6 +1,6 @@
 ConfigCarthief = {
 
-    debug = true,
+    debug = false,
 
     timerFurto = 10, --secondi 
 
