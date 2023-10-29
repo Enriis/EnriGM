@@ -23,6 +23,8 @@ end
 
 AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
     if playerId then
+
+
         -- Funziona primo evento playerLoaded  del server
 
         -- Banca
@@ -74,6 +76,10 @@ AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
         CheckStaff({array = {
             id = discordID
         }}, playerId)
+
+        -- Container
+
+        CaricaContainer()
         
     end
 end)

@@ -1,12 +1,5 @@
 local Container = {}
 
-
-AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
-    if playerId then
-        CaricaContainer()
-    end
-end)
-
 RegisterServerEvent('en_container:azioni', function(source, azione, data)
     local xPlayer = ESX.GetPlayerFromId(source)
     local nomeGrid = nil
@@ -72,12 +65,12 @@ RegisterServerEvent('en_container:azioni', function(source, azione, data)
         xPlayer.showNotification("Hai venduto il container al prezzo di: "..prezzo.."$")
     end
 
-    SaveResourceFile(GetCurrentResourceName(), "container.json", json.encode(Container, {indent = true}), -1)
+    SaveResourceFile(GetCurrentResourceName(), "json/container.json", json.encode(Container, {indent = true}), -1)
     TriggerClientEvent("en_container:refreshClientSource", xPlayer.source, nomeGrid)
 end)
 
 function CaricaContainer() 
-    local container = LoadResourceFile(GetCurrentResourceName(), "container.json")
+    local container = LoadResourceFile(GetCurrentResourceName(), "json/container.json")
     local data_container = json.decode(container or '{}')
     Container = data_container
     for k,v in pairs(Container) do 
@@ -133,7 +126,7 @@ ESX.RegisterServerCallback("en_container:getPrezzoContainer", function(source, c
 end)
 
 function CreaContainer(nome, prezzo, peso, slot, own, coords)
-    local container = LoadResourceFile(GetCurrentResourceName(), "container.json")
+    local container = LoadResourceFile(GetCurrentResourceName(), "json/container.json")
     local data_container = json.decode(container or '{}')
     data_container[nome] = {
         nome = nome,
@@ -146,5 +139,6 @@ function CreaContainer(nome, prezzo, peso, slot, own, coords)
     }
     Wait(100)
     Container = data_container
-    SaveResourceFile(GetCurrentResourceName(), "container.json", json.encode(data_container, {indent = true}), -1)
+    SaveResourceFile(GetCurrentResourceName(), "json/container.json", json.encode(data_container, {indent = true}), -1)
+    CaricaContainer() 
 end
