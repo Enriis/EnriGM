@@ -217,7 +217,7 @@ function StopFurtoExitCar()
 end
 
 function CreatePosEndFurto()
-    local random = math.random(1,1)
+    local random = math.random(1,8)
     local posEndCar = ConfigCarthief["EndCar"][random]
     SetNewWaypoint(posEndCar.x, posEndCar.y)
     ESX.ShowNotification("Dirigiti alla posizione per consegnare il veicolo", "info")

@@ -10,7 +10,6 @@ end)
 
 
 RegisterNUICallback("confermaKit", function(data)
-    print(json.encode(data))
     if json.encode(data) == "[]" then return end
     TriggerScreenblurFadeOut(300)
     SetNuiFocus(false, false)
@@ -21,19 +20,18 @@ RegisterNUICallback("confermaKit", function(data)
 end)
 
 
-function ConfermaKit(num)
+function ConfermaKit(kits)
     local alert = lib.alertDialog({
         header = '👑 Artemis RolePlay 👑',
-        content = 'Vuoi confermare il kit: '..num.." ?",
+        content = 'Vuoi confermare il kit: '..kits.." ?",
         centered = true,
         cancel = true
     })
-    print(alert)
     if alert == "cancel" then
         Wait(250)
         ExecuteCommand("kit")
     else
-        TriggerServerEvent("dd_kit:confermaKit", GetPlayerServerId(PlayerId()), "1")
+        TriggerServerEvent("dd_kit:confermaKit", GetPlayerServerId(PlayerId()), kits)
         FreezeEntityPosition(PlayerPedId(), false)
     end
 end

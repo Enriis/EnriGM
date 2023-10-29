@@ -342,9 +342,9 @@ if ESX.GetConfig().Multichar then
 	end)
 
 	-- if Config.commands.relog then
-	-- 	RegisterCommand('relog', function(source, args, rawCommand)
-	-- 		TriggerServerEvent('esx_multicharacter:relog')
-	-- 	end)
+		RegisterCommand('relog', function(source, args, rawCommand)
+			TriggerServerEvent('esx_multicharacter:relog')
+		end)
 	-- end
 	cam = nil
 	lastcoords= nil

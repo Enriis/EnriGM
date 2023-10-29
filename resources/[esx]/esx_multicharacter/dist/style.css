@@ -458,7 +458,7 @@ wall4 door {
   height: 224rem;
   border-radius: 1rem;
   box-shadow: 0 0 0 150rem #7f95a8;
-  left: -10rem;
+  left: -30rem;
   right: -10rem;
   margin: auto;
   top: 60rem;
@@ -862,8 +862,6 @@ fireexit i:nth-of-type(2):after {
 @-webkit-keyframes spin {
   to { -webkit-transform: rotate(360deg); }
 }
-
-
 
 button2 {
   display: none;
