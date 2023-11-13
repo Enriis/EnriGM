@@ -51,7 +51,7 @@ Config.Raiding = {
 
 --------------------- Garage Settings ---------------------------------
 Config.Garage = {
-  Enabled = true, -- Enable/Disable Garage Default: true
+  Enabled = false, -- Enable/Disable Garage Default: true
   OwnedVehiclesOnly = true, -- Only allow owned vehicles to be stored Default: true
   MySQLquery = "UPDATE `owned_vehicles` SET `stored` = ? WHERE `plate` = ?" -- MySQL Query to store vehicles `?` = True/false, Vehicle Plate
 }

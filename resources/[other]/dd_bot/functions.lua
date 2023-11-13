@@ -3,20 +3,18 @@ function SendLog(data, cb)
     end, 'POST', json.encode(data), {['Content-Type'] = 'application/json'})
 end
 
---          SendLog({
---             embed = {
---                 id_stanza = "1156609051526967426",
---                 title = "SERVER ONLINE", 
---                 color = "5763719", 
---                 description = "Server online, connettiti."
---             }
---          })
+        --  SendLog({
+        --     embed = {
+        --         id_stanza = "1156609051526967426",
+        --         title = "SERVER ONLINE", 
+        --         color = "5763719", 
+        --         description = "Server online, connettiti."
+        --     }
+        --  })
 
 function SendAlert(data, cb)
 
 end
-
-exports('sendLogs', SendLog)
 -- exports('sendData', sendData)
 
 -- RegisterCommand("serveron", function(source, args)
@@ -35,3 +33,6 @@ exports('sendLogs', SendLog)
 --         return
 --     end
 -- end)
+
+function LogAddPexBot()
+end

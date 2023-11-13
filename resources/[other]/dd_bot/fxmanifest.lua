@@ -8,4 +8,8 @@ server_scripts {
     'server.lua'
 }
 
+server_export {
+    'SendLog'
+}
+
 server_only 'yes'

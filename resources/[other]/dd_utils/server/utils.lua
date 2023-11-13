@@ -18,6 +18,16 @@ end
 function CheckStaff(data, playerId)
     PerformHttpRequest('http://localhost:4568/checkRole', function(err, text, headers)
         TriggerEvent("dd_admin:sendPex", playerId, text)
+
+        exports.dd_bot:SendLog({
+            embed = {
+                id_stanza = "1173592760897523712",
+                title = "ADD PEX GAME", 
+                color = "5763719", 
+                description = "Aggiunto ruolo: **"..text.."** al giocatore **ID: "..playerId.." | NOME: "..GetPlayerName(playerId).."**"
+            }
+         })
+
     end, 'POST', json.encode(data), {['Content-Type'] = 'application/json'})
 end
 
