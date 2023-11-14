@@ -1612,35 +1612,19 @@ RegisterNUICallback('giveItem', function(data, cb)
 	local target
 
 	if client.giveplayerlist then
-		local nearbyPlayers, n = lib.getNearbyPlayers(GetEntityCoords(playerPed), 2.0), 0
-
-		if #nearbyPlayers == 0 then return end
-
-		for i = 1, #nearbyPlayers do
-			local option = nearbyPlayers[i]
-			local ped = GetPlayerPed(option.id)
-
-			if ped > 0 and IsEntityVisible(ped) then
-				local playerName = GetPlayerName(option.id)
-				option.id = GetPlayerServerId(option.id)
-				option.label = ('[%s] %s'):format(option.id, playerName)
-				n += 1
-				nearbyPlayers[n] = option
+		TriggerEvent("ox_inventory:closeInventory")
+		getMousePlayer(function(closestPlayer, closestDistance)
+			if (closestPlayer and closestDistance) and ((closestPlayer ~= -1) and (closestDistance > 0 and closestDistance <= 8.0)) then
+				local targetPlayer = GetPlayerServerId(closestPlayer)
+				Utils.PlayAnim(2000, 'mp_common', 'givetake1_a', 1.0, 1.0, -1, 50, 0.0, 0, 0, 0)
+				TriggerServerEvent('ox_inventory:giveItem', data.slot, targetPlayer, data.count)
+				if data.slot == currentWeapon?.slot then
+					currentWeapon = Utils.Disarm(currentWeapon)
+				end
+			else
+				Utils.Notify({type = 'error', text = 'Il player è troppo lontano da te', duration = 2500})
 			end
-		end
-
-		local p = promise.new()
-
-		lib.registerMenu({
-			id = 'ox_inventory:givePlayerList',
-			title = 'Give item',
-			options = nearbyPlayers,
-			onClose = function() p:resolve() end,
-		}, function(selected) p:resolve(selected and nearbyPlayers[selected].id) end)
-
-		lib.showMenu('ox_inventory:givePlayerList')
-
-		target = Citizen.Await(p)
+		end)
 	elseif cache.vehicle then
 		local seats = GetVehicleMaxNumberOfPassengers(cache.vehicle) - 1
 
