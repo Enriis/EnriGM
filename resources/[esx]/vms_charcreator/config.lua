@@ -13,7 +13,7 @@ end
 
 -- @Config.SkinManager for ESX: "esx_skin" / "fivem-appearance" / "illenium-appearance"
 -- @Config.SkinManager for QB-Core: "qb-clothing" / "fivem-appearance" / "illenium-appearance"
-Config.SkinManager = "esx_skin"
+Config.SkinManager = "dd_skin"
 
 Config.TestCommand = true -- /character -- command to test the character creator **(We do not recommend using this on the main server)**
 if Config.TestCommand then

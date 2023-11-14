@@ -44,7 +44,7 @@ local function openCharacterCreator(sex, isAlreadyHaveSkin)
                 gender = skin.sex == 0 and 'male' or 'female'
                 lastSkin = skin
             end)
-        elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+        elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
             tempSkinTable = exports[Config.SkinManager]:getPedAppearance(PlayerPedId())
             lastSkin = exports[Config.SkinManager]:getPedAppearance(PlayerPedId())
             gender = tempSkinTable.sex == 0 and 'male' or 'female'
@@ -60,7 +60,7 @@ local function openCharacterCreator(sex, isAlreadyHaveSkin)
         if Config.SkinManager == "esx_skin" then
             tempSkinTable = Character_ESX
             gender = tempSkinTable.sex == 0 and 'male' or 'female'
-        elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+        elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
             tempSkinTable = Character_AP
             gender = tempSkinTable.sex == 0 and 'male' or 'female'
         elseif Config.SkinManager == "qb-clothing" then
@@ -74,7 +74,7 @@ local function openCharacterCreator(sex, isAlreadyHaveSkin)
             if Config.SkinManager == "esx_skin" then
                 TriggerEvent('skinchanger:loadSkin', {sex = sex})
                 Character_ESX['sex'] = sex
-            elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+            elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                 appearance_switcher('sex', sex)
             end
         elseif Config.Core == "QB-Core" then
@@ -86,7 +86,7 @@ local function openCharacterCreator(sex, isAlreadyHaveSkin)
             end
             SetPlayerModel(PlayerId(), model)
             SetPedComponentVariation(PlayerPedId(), 0, 0, 0, 2)
-            if Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+            if Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                 appearance_switcher('sex', sex)
             end
         end
@@ -101,7 +101,7 @@ local function openCharacterCreator(sex, isAlreadyHaveSkin)
                 end
                 updateValue(tempSkinTable)
             end
-        elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+        elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
             if Config.EnableFirstCreationClothes then
                 for k, v in pairs(Config.FirstCreationClothes[mySex]) do
                     appearance_switcher(k, v)
@@ -145,7 +145,7 @@ RegisterNUICallback("change", function(data)
                         tempSkinTable[k] = v
                     end
                     updateValue(tempSkinTable)
-                elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+                elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                     for k, v in pairs(Config.clotheSets[tonumber(data.new)][mySex]) do
                         appearance_switcher(k, v)
                     end
@@ -155,7 +155,7 @@ RegisterNUICallback("change", function(data)
                     for k, v in pairs(Config.clotheSets[tonumber(data.new)][mySex]) do
                         qbcore_switcher(k, v)
                     end
-                elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+                elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                     for k, v in pairs(Config.clotheSets[tonumber(data.new)][mySex]) do
                         appearance_switcher(k, v)
                     end
@@ -172,7 +172,7 @@ RegisterNUICallback("change", function(data)
                 end
                 tempSkinTable[data.type] = tonumber(data.new)
                 updateValue(tempSkinTable)
-            elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+            elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                 appearance_switcher(data.type, data.new)
             end
         elseif (Config.Core == "QB-Core") then
@@ -185,13 +185,13 @@ RegisterNUICallback("change", function(data)
                 end
                 SetPlayerModel(PlayerId(), model)
                 SetPedComponentVariation(PlayerPedId(), 0, 0, 0, 2)
-                if Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+                if Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                     appearance_switcher(data.type, data.new)
                 end
             else
                 if Config.SkinManager == "qb-clothing" then
                     qbcore_switcher(data.type, data.new)
-                elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+                elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                     appearance_switcher(data.type, data.new)
                 end
             end
@@ -207,13 +207,13 @@ RegisterNUICallback("change", function(data)
                 if Config.SkinManager == "esx_skin" then
                     tempSkinTable[secondItem] = 0
                     updateValue(tempSkinTable)
-                elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+                elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                     appearance_switcher(secondItem, 0)
                 end
             elseif Config.Core == "QB-Core" then
                 if Config.SkinManager == "qb-clothing" then
                     qbcore_switcher(secondItem, 0)
-                elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+                elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                     appearance_switcher(secondItem, 0)
                 end
             end
@@ -336,8 +336,8 @@ function DeleteSkinCam(isCanceled)
             if Config.SkinManager == "esx_skin" then
                 TriggerEvent('skinchanger:loadSkin', tempSkinTable)
                 TriggerServerEvent('esx_skin:save', tempSkinTable)
-            elseif Config.SkinManager == "fivem-appearance" then
-                TriggerServerEvent('fivem-appearance:save', tempSkinTable)
+            elseif Config.SkinManager == "dd_skin" then
+                TriggerServerEvent('dd_skin:save', tempSkinTable)
             elseif Config.SkinManager == "illenium-appearance" then
                 TriggerServerEvent('illenium-appearance:server:saveAppearance', tempSkinTable)
             end
@@ -346,7 +346,7 @@ function DeleteSkinCam(isCanceled)
                 local model = GetEntityModel(PlayerPedId()) == GetHashKey('mp_m_freemode_01') and GetHashKey('mp_m_freemode_01') or GetHashKey('mp_f_freemode_01')
                 local character_encode = json.encode(tempSkinTable)
                 TriggerServerEvent("qb-clothing:saveSkin", model, character_encode)
-            elseif Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+            elseif Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                 TriggerServerEvent(Config.SkinManager..':server:saveAppearance', tempSkinTable)
             end
         end
@@ -357,7 +357,7 @@ function DeleteSkinCam(isCanceled)
                 TriggerServerEvent('esx_skin:save', lastSkin)
                 Wait(1000000)
                 TriggerEvent('shuttle_misc:creadocumento', 'documento')
-            elseif Config.SkinManager == "fivem-appearance" then
+            elseif Config.SkinManager == "dd_skin" then
                 TriggerEvent('skinchanger:loadSkin', lastSkin)
                 TriggerServerEvent('esx_skin:save', lastSkin)
                 Wait(1000000)
@@ -369,7 +369,7 @@ function DeleteSkinCam(isCanceled)
                 TriggerEvent('shuttle_misc:creadocumento', 'documento')
             end
         elseif Config.Core == "QB-Core" then
-            if Config.SkinManager == "fivem-appearance" or Config.SkinManager == "illenium-appearance" then
+            if Config.SkinManager == "dd_skin" or Config.SkinManager == "illenium-appearance" then
                 TriggerEvent(Config.SkinManager..':client:reloadSkin')
                 Wait(1000000)
                 TriggerEvent('shuttle_misc:creadocumento', 'documento')

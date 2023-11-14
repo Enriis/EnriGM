@@ -286,7 +286,7 @@ if ESX.GetConfig().Multichar then
 		local spawn = playerData.coords or Config.Spawn
 		if isNew or not skin or #skin == 1 then
 			local finished = false
-			skin = Config.Default[playerData.sex]
+			skin = Config.default_char[playerData.sex]
 			skin.sex = playerData.sex == "m" and 0 or 1
 			local model = skin.sex == 0 and mp_m_freemode_01 or mp_f_freemode_01
 			RequestModel(model)

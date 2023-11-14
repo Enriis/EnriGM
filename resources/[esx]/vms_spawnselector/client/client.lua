@@ -137,6 +137,7 @@ function DestoryCams()
         TriggerServerEvent('qb-houses:server:SetInsideMeta', 0, false)
         TriggerServerEvent('qb-apartments:server:SetInsideMeta', 0, 0, false)
     end
+    print("Foto - kit")
 end
 
 RegisterNetEvent('vms_spawnselector:open')
