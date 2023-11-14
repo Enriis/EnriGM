@@ -5,7 +5,7 @@ function ControlloMenette()
     return ammanettato
 end
 
-RegisterNetEvent("en_f5:thief:ammanettaTarget_c", function(types)
+RegisterNetEvent("en_f5:thief:ammanettaTarget_c", function(types, playerheading, playerCoords, playerlocation)
     if types == 1 then -- Player
         Citizen.Wait(250)
         loadanimdict('mp_arrest_paired')
@@ -15,7 +15,7 @@ RegisterNetEvent("en_f5:thief:ammanettaTarget_c", function(types)
         if ammanettato then return end
         playerPed = GetPlayerPed(-1)
         SetCurrentPedWeapon(playerPed, GetHashKey('WEAPON_UNARMED'), true)
-        local x, y, z = table.unpack(playercoords + playerlocation * 1.0)
+        local x, y, z = table.unpack(playerCoords + playerlocation * 1.0)
         SetEntityCoords(GetPlayerPed(-1), x, y, z)
         SetEntityHeading(GetPlayerPed(-1), playerheading)
         Citizen.Wait(250)
@@ -29,7 +29,7 @@ RegisterNetEvent("en_f5:thief:ammanettaTarget_c", function(types)
     end
 end)
 
-RegisterNetEvent("en_f5:thief:smanettaTarget_c", function(types)
+RegisterNetEvent("en_f5:thief:smanettaTarget_c", function(types, playerheading, playerCoords, playerlocation)
     if types == 1 then -- Player
         Citizen.Wait(250)
         loadanimdict('mp_arresting')
@@ -38,7 +38,7 @@ RegisterNetEvent("en_f5:thief:smanettaTarget_c", function(types)
         ClearPedTasks(GetPlayerPed(-1))
     elseif types == 2 then -- Target
         if not ammanettato then return end
-        local x, y, z = table.unpack(playercoords + playerlocation * 1.0)
+        local x, y, z = table.unpack(playerCoords + playerlocation * 1.0)
         SetEntityCoords(GetPlayerPed(-1), x, y, z)
         SetEntityHeading(GetPlayerPed(-1), playerheading)
         Citizen.Wait(250)

@@ -286,7 +286,7 @@ if ESX.GetConfig().Multichar then
 		local spawn = playerData.coords or Config.Spawn
 		if isNew or not skin or #skin == 1 then
 			local finished = false
-			skin = Config.default_char[playerData.sex]
+			skin = Config.Default[playerData.sex]
 			skin.sex = playerData.sex == "m" and 0 or 1
 			local model = skin.sex == 0 and mp_m_freemode_01 or mp_f_freemode_01
 			RequestModel(model)
@@ -301,26 +301,22 @@ if ESX.GetConfig().Multichar then
 				SetPedAoBlobRendering(playerPed, true)
 				ResetEntityAlpha(playerPed)
 				TriggerEvent('esx_skin:openSaveableMenu', function()
-					finished = true end, function() finished = true
+					finished = true 
+				end, function()
+					finished = true
 				end)
 			end)
 			repeat Wait(200) until finished
-			foto()
 		end
 		DoScreenFadeOut(100)
-
 		SetCamActive(cam, false)
 		RenderScriptCams(false, false, 0, true, true)
 		cam = nil
 		local playerPed = PlayerPedId()
 		FreezeEntityPosition(playerPed, true)
-		SetEntityCoordsNoOffset(playerPed, spawn.x, spawn.y, spawn.z, false, false, false, true)
-		SetEntityHeading(playerPed, spawn.heading)
+		exports['vms_spawnselector']:OpenSpawnSelector() -- ADDED EXPORT TO OPEN SPAWN SELECTOR
 		if not isNew then 
-			TriggerEvent('skinchanger:loadSkin', skin or Characters[spawned].skin) 		
-			if Config.action.SpawnSelect then
-				openSpawnSelector() 
-			end
+			TriggerEvent('skinchanger:loadSkin', skin or Characters[spawned].skin) 
 		end
 		Wait(400)
 		DoScreenFadeIn(400)

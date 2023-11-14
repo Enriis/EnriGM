@@ -80,9 +80,15 @@ DD.ThiefMenu = function()
         end
         local target = GetPlayerServerId(id)
         if verifica == "amm" then
-            TriggerServerEvent("en_f5:thief:ammanettaTarget", GetPlayerServerId(PlayerId()), target)
+            local playerheading = GetEntityHeading(GetPlayerPed(-1))
+            local playerCoords = GetEntityCoords(GetPlayerPed(-1))
+            local playerlocation = GetEntityForwardVector(PlayerPedId())
+            TriggerServerEvent("en_f5:thief:ammanettaTarget", GetPlayerServerId(PlayerId()), target, playerheading, playerCoords, playerlocation)
         elseif verifica == "sman" then
-            TriggerServerEvent("en_f5:thief:smanettaTarget", GetPlayerServerId(PlayerId()), target)
+            local playerheading = GetEntityHeading(GetPlayerPed(-1))
+            local playerCoords = GetEntityCoords(GetPlayerPed(-1))
+            local playerlocation = GetEntityForwardVector(PlayerPedId())
+            TriggerServerEvent("en_f5:thief:smanettaTarget", GetPlayerServerId(PlayerId()), target, playerheading, playerCoords, playerlocation)
         end
     end, function(data, menu)
         menu.close()
