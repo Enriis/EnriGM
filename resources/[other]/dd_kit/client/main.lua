@@ -1,7 +1,7 @@
 local ESX = exports['es_extended']:getSharedObject()
 
 RegisterCommand("kit", function()
-    TriggerScreenblurFadeIn(300)
+    print("okee")
     SendNUIMessage({
         apri = true,
     })
@@ -11,7 +11,6 @@ end)
 
 RegisterNUICallback("confermaKit", function(data)
     if json.encode(data) == "[]" then return end
-    TriggerScreenblurFadeOut(300)
     SetNuiFocus(false, false)
     SendNUIMessage({
         apri = false,
@@ -33,6 +32,10 @@ function ConfermaKit(kits)
     else
         TriggerServerEvent("dd_kit:confermaKit", GetPlayerServerId(PlayerId()), kits)
         FreezeEntityPosition(PlayerPedId(), false)
+        Wait(1000)
+        TriggerEvent('vms_spawnselector:open')
+		print("SpawnSelector")
+
     end
 end
 

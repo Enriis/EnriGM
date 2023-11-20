@@ -35,7 +35,7 @@ body {
 }
 
 .animate__animated.animate__fadeOutDown {
-    animation-duration: 250ms;
+    animation-duration: 150ms;
 }
 
 .animate__animated.animate__fadeInUp {

@@ -132,8 +132,6 @@ addEventListener("message", function(event){
         document.getElementById("toggle_load").style.display = "block";
     }else if (event.data.toggle_load === false) {
         document.getElementById("toggle_load").style.display = "none";
-    }else if (event.data.type === "openSpawnSelector") {
-        openSpawnSelector();
     }else{
     	document.getElementById("ok").style.display = "none";
     }

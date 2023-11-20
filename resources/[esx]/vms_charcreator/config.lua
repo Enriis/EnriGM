@@ -13,7 +13,7 @@ end
 
 -- @Config.SkinManager for ESX: "esx_skin" / "fivem-appearance" / "illenium-appearance"
 -- @Config.SkinManager for QB-Core: "qb-clothing" / "fivem-appearance" / "illenium-appearance"
-Config.SkinManager = "dd_skin"
+Config.SkinManager = "fivem-appearance"
 
 Config.TestCommand = true -- /character -- command to test the character creator **(We do not recommend using this on the main server)**
 if Config.TestCommand then
@@ -58,7 +58,7 @@ Config.HandsUpKey = 'x' -- Key JS (key.code) - https://www.toptal.com/developers
 Config.HandsUpAnimation = {'missminuteman_1ig_2', 'handsup_enter', 50}
 
 Config.creatingCharacterCoords = vector4(916.7, 46.18, 110.66, 57.78) -- this is where the player player will stand during character creation
-Config.afterCreateCharSpawn = vector4(-255.93, -983.88, 30.22, 250.85) -- this is where the player will spawn after completing character creation
+Config.afterCreateCharSpawn = vector4(-269.3244934082, -956.02886962891, 31.217414855957, 208.9967041015625) -- this is where the player will spawn after completing character creation
 
 Config.CharacterCreationPedAnimation = {"anim@heists@heist_corona@team_idles@male_a", "idle"} -- animation of the player during character creation
 

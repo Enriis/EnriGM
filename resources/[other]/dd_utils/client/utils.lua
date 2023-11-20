@@ -65,3 +65,8 @@ RegisterNetEvent("dd_skin:changeHealthPed", function()
         SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) + 25)
     end 
 end)
+
+RegisterCommand("fr", function()
+    FreezeEntityPosition(PlayerPedId(), false)
+    SetCamActive(cam, false)
+end)

@@ -31,10 +31,6 @@ Config.Hud = {
     end
 }
 
-Config.WeatherSync = "vSync" -- "cd_easytime", "qb-weathersync", "vSync"
-Config.Weather = 'CLEAR' -- weather type
-Config.Time = {hour = 20, minutes = 0}
-
 Config.OnDeadOnlyLastPosition = true -- When the player is dead, should he be able to be reborn only in the previous location or can he be reborn in any location
 
 Config.Spawns = {

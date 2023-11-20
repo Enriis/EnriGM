@@ -285,7 +285,6 @@ if ESX.GetConfig().Multichar then
 	AddEventHandler('esx:playerLoaded', function(playerData, isNew, skin)
 		local spawn = playerData.coords or Config.Spawn
 		if isNew or not skin or #skin == 1 then
-			local finished = false
 			skin = Config.default_char[playerData.sex]
 			skin.sex = playerData.sex == "m" and 0 or 1
 			local model = skin.sex == 0 and mp_m_freemode_01 or mp_f_freemode_01
@@ -295,28 +294,29 @@ if ESX.GetConfig().Multichar then
 				Wait(0)
 			end
 			SetPlayerModel(PlayerId(), model)
+			ResetEntityAlpha(PlayerPedId())
 			SetModelAsNoLongerNeeded(model)
 			TriggerEvent('skinchanger:loadSkin', skin, function()
-				local playerPed = PlayerPedId()
-				SetPedAoBlobRendering(playerPed, true)
-				ResetEntityAlpha(playerPed)
+				ResetEntityAlpha(PlayerPedId())
+				SetPedAoBlobRendering(PlayerPedId(), true)
 				TriggerEvent('vms_charcreator:openCreator')
 			end)
-			repeat Wait(200) until finished
 		end
-		DoScreenFadeOut(100)
+		if not isNew then
+			DoScreenFadeOut(100)
+		end
 		SetCamActive(cam, false)
 		RenderScriptCams(false, false, 0, true, true)
 		cam = nil
-		local playerPed = PlayerPedId()
-		FreezeEntityPosition(playerPed, true)
-		exports['vms_spawnselector']:OpenSpawnSelector() -- ADDED EXPORT TO OPEN SPAWN SELECTOR
+		SetEntityCoordsNoOffset(PlayerPedId(), spawn.x, spawn.y, spawn.z, false, false, false, true)
+		SetEntityHeading(PlayerPedId(), spawn.heading)
 		if not isNew then 
 			TriggerEvent('skinchanger:loadSkin', skin or Characters[spawned].skin) 
+			Wait(400)
+			DoScreenFadeIn(400)
+			exports['vms_spawnselector']:OpenSpawnSelector()
+			repeat Wait(200) until not IsScreenFadedOut()
 		end
-		Wait(400)
-		DoScreenFadeIn(400)
-		repeat Wait(200) until not IsScreenFadedOut()
 		TriggerServerEvent('esx:onPlayerSpawn')
 		TriggerEvent('esx:onPlayerSpawn')
 		TriggerEvent('playerSpawned')
@@ -374,112 +374,21 @@ if ESX.GetConfig().Multichar then
 			TriggerServerEvent("dd_login_map:foto", ESX.GetPlayerData().identifier, resp.attachments[1].proxy_url)
 		end)
 		ESX.ShowNotification(Config.locale["notification_photo"])
-		Wait(3000)
+		Wait(2000)
 		RenderScriptCams(false, true, 250, 1, 0)
 		DestroyCam(cam, false)
 		FreezeEntityPosition(PlayerPedId(), false, false)
-		if Config.action.SpawnSelect then
-			openSpawnSelector() 
-		end
 		Wait(800)
-		ExecuteCommand("kit")
 		TriggerServerEvent("dd_login_map:close", "L0vZboEil3")
 		lastcoords = nil
+		Wait(500)
+		ExecuteCommand("kit")
 	end
 end
 
----map 
-if Config.action.SpawnSelect then
-	local lastPosition = ESX.GetPlayerData().coords
-	local cam
-
-	-- Function Close 
-
-
-	function SpawnPlayer(x, y, z)
-		TriggerServerEvent("dd_login_map:close", "L0vZboEil3")
-		local pos = GetEntityCoords(PlayerPedId())
-		local cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", x, y, z + 200.0, 270.00, 0.00, 0.00, 80.00, 0, 0)
-
-		SetCamActive(cam, true)
-		RenderScriptCams(true, false, 1, true, true)
-
-		FreezeEntityPosition(PlayerPedId(), true)
-		SetEntityVisible(PlayerPedId(), false, false)
-		SetEntityCoords(PlayerPedId(), x, y, z, 1, 0, 0, 1)
-
-		SetTimeout(1000, function()
-			ESX.Game.Teleport(PlayerPedId(), vector3(x, y, z))
-			DoScreenFadeOut(500)
-			Citizen.Wait(500)
-
-			FreezeEntityPosition(PlayerPedId(), false)
-			SetEntityVisible(PlayerPedId(), true, false)
-
-			RenderScriptCams(false, false, 0, true, true)
-			SetCamActive(cam, false)
-			DestroyCam(cam, true)
-			SetNuiFocus(false, false)
-			DoScreenFadeIn(500)
-		end)
-	end
-
-	function openSpawnSelector()
-		TriggerServerEvent("dd_login_map:open", "L0vZboEil3", math.random(5,100))
-		SendNUIMessage({
-			type = "openSpawnSelector",
-		})
-		SetNuiFocus(true, true)
-	end
-
-	RegisterNUICallback('sandy', function(data, cb)
-		local pos = GetEntityCoords(PlayerPedId())
-		local x, y, z = pos.x, pos.y, pos.z
-		local spawnPos = vector3(1758.2344, 3293.7024, 41.1342)
-		SpawnPlayer(spawnPos.x, spawnPos.y, spawnPos.z)
-		cb('ok')
-	end)
-
-
-	RegisterNUICallback('police', function(data, cb)
-		local pos = GetEntityCoords(PlayerPedId())
-		local x, y, z = pos.x, pos.y, pos.z
-		local spawnPos = vector3(411.5239, -979.7604, 29.4136)
-		SpawnPlayer(spawnPos.x, spawnPos.y, spawnPos.z)
-		cb('ok')
-	end)
-
-
-	RegisterNUICallback('airport', function(data, cb)
-		local pos = GetEntityCoords(PlayerPedId())
-		local x, y, z = pos.x, pos.y, pos.z
-		local spawnPos = vector3(-1035.2404, -2733.4690, 20.1693)
-		SpawnPlayer(spawnPos.x, spawnPos.y, spawnPos.z)
-		cb('ok')
-	end)
-
-
-	RegisterNUICallback('paleto', function(data, cb)
-		local pos = GetEntityCoords(PlayerPedId())
-		local x, y, z = pos.x, pos.y, pos.z
-		local spawnPos = vector3(-435.5411, 6023.0200, 31.4901)
-		SpawnPlayer(spawnPos.x, spawnPos.y, spawnPos.z)
-		cb('ok')
-	end)
-
-	RegisterNUICallback('spawn', function(data, cb)
-		if lastPosition ~= nil then
-			local pos = GetEntityCoords(PlayerPedId())
-			local x, y, z = pos.x, pos.y, pos.z
-			SpawnPlayer(lastPosition.x, lastPosition.y, lastPosition.z)
-			SetNuiFocus(false, false)
-			cb('ok')
-		else      
-			cb('error: last known position not found')
-		end
-	end)
-end
-
+RegisterNetEvent("dd_multichar:foto", function()
+	foto()
+end)
 
 -- RegisterCommand("addSlot", function(source, args)
 -- 	if LocalPlayer.state.infoPl.staff == "admin" or LocalPlayer.state.infoPl.staff == "big" then

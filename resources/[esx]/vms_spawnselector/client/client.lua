@@ -1,6 +1,8 @@
 local currectSpawnPoint = nil
 local lastSpawnPoint = nil
 local cam, cameraOffset = nil
+local new = false
+local peds
 
 if Config.Core == "ESX" then
     ESX = Config.CoreExport()
@@ -43,12 +45,13 @@ RegisterNUICallback("select", function(data)
     SelectSpawn(data.isLastPosition)
 end)
 
-function OpenSpawnSelector()
+function OpenSpawnSelector(new)
+    peds = PlayerPedId()
+    new = new
     if not DoesCamExist(cam) then
         cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
     end
-    TriggerEvent('vms_spawnselector:WeatherSync', true)
-    FreezeEntityPosition(PlayerPedId(), true)
+    FreezeEntityPosition(peds, true)
     SetEntityVisible(PlayerPedId(), false)
     currectSpawnPoint = 1
     lastSpawnPoint = currectSpawnPoint
@@ -56,7 +59,7 @@ function OpenSpawnSelector()
     SetCamCoord(cam, Config.Spawns[1].camCoords.x, Config.Spawns[1].camCoords.y, Config.Spawns[1].camCoords.z)
     PointCamAtCoord(cam, Config.Spawns[1].spawnCoords.x, Config.Spawns[1].spawnCoords.y, Config.Spawns[1].spawnCoords.z)
     SetCamActive(cam, true)
-    RenderScriptCams(true, true, 500, true, true)
+    RenderScriptCams(true, true, 100, true, true)
     Config.Hud:Disable()
     SendNUIMessage({action = 'open'})
     SendNUIMessage({
@@ -122,22 +125,15 @@ function SelectSpawn(isLastPosition)
 end
 
 function DestoryCams()
+    DoScreenFadeIn(100)
     SendNUIMessage({action = 'close'})
-    Config.Hud:Enable()
+    SetNuiFocus(false, false)
     SetCamActive(cam, false)
     cam = nil
-    RenderScriptCams(false, true, 2500, true, true)
-    SetNuiFocus(false, false)
+    RenderScriptCams(false, true, 2000, true, true)
     SetEntityVisible(PlayerPedId(), true)
-    FreezeEntityPosition(PlayerPedId(), false)
-    TriggerEvent('vms_spawnselector:WeatherSync', false)
-    if Config.Core == "QB-Core" then
-        TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
-        TriggerEvent('QBCore:Client:OnPlayerLoaded')
-        TriggerServerEvent('qb-houses:server:SetInsideMeta', 0, false)
-        TriggerServerEvent('qb-apartments:server:SetInsideMeta', 0, 0, false)
-    end
-    print("Foto - kit")
+    FreezeEntityPosition(peds, false)
+    print("chiuso")
 end
 
 RegisterNetEvent('vms_spawnselector:open')

@@ -24,6 +24,5 @@ RegisterServerEvent("dd_kit:confermaKit", function(source, kit)
         xPlayer.addInventoryItem("phone", 1)
     end
     Wait(1000)
-    TriggerServerEvent("dd_utils:startSpawnPoint", source)
 end)
 

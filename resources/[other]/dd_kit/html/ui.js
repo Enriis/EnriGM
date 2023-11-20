@@ -27,4 +27,5 @@ $('.container-hot').on("click", event => {
     const clickedElement = $(event.target);
     var clickedBtnID = $(clickedElement).attr('id')
     $.post('https://dd_kit/confermaKit', JSON.stringify({ id: clickedBtnID }));
+    display(false);
 });
