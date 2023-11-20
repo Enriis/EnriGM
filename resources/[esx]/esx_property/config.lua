@@ -35,7 +35,7 @@ Config.ZonePrices = {
 
 --------------------- Raid Settings ---------------------------------
 Config.Raiding = {
-  Enabled = true, -- Enable/Disable Raiding Default: true
+  Enabled = false, -- Enable/Disable Raiding Default: true
   CanAdminsRaid = true, -- Can Admins Raid Houses Default: true
   ItemRequired = { -- Item Required to Raid -- Remove To Disable
     RemoveItem = true, -- Remove Item from Inventory Default: true

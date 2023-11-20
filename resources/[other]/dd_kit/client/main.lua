@@ -2,6 +2,7 @@ local ESX = exports['es_extended']:getSharedObject()
 
 RegisterCommand("kit", function()
     print("okee")
+    TriggerScreenblurFadeIn(300)
     SendNUIMessage({
         apri = true,
     })
@@ -11,6 +12,7 @@ end)
 
 RegisterNUICallback("confermaKit", function(data)
     if json.encode(data) == "[]" then return end
+    TriggerScreenblurFadeOut(300)
     SetNuiFocus(false, false)
     SendNUIMessage({
         apri = false,
