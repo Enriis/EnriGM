@@ -300,10 +300,6 @@ function CreateSkinCam(data)
     SetCamCoord(cam, cameraOffset.x, cameraOffset.y, cameraOffset.z+0.65)
     PointCamAtCoord(cam, myCoords.x, myCoords.y, myCoords.z+0.65)
     SetCamFov(cam, 30.0)
-
-    SetTimecycleModifier('MP_corona_heist_DOF')
-    SetTimecycleModifierStrength(1.0)
-
     RequestAnimDict(Config.CharacterCreationPedAnimation[1])
     while not HasAnimDictLoaded(Config.CharacterCreationPedAnimation[1]) do
         Wait(1)
@@ -455,9 +451,10 @@ StartLoop = function()
 			NetworkConcealPlayer(k, false, false)
 		end
         FreezeEntityPosition(PlayerPedId(), false)
-        -- TriggerEvent('vms_spawnselector:open')
+        --TriggerEvent('vms_spawnselector:open')
         SetEntityCoords(PlayerPedId(), -269.3244934082,-956.02886962891,31.217414855957)
         SetEntityHeading(PlayerPedId(),208.9967041015625)
+        Wait(400)
         TriggerEvent("dd_multichar:foto")
 	end)
 end

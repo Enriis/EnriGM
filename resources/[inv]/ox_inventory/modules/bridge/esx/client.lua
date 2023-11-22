@@ -18,9 +18,7 @@ end
 ---@diagnostic disable-next-line: duplicate-set-field
 function client.setPlayerStatus(values)
 	for name, value in pairs(values) do
-		if value > 0 then 
-			TriggerServerEvent("dd_status:add", GetPlayerServerId(PlayerId()), values)
-		end
+		if value > 0 then TriggerEvent('esx_status:add', name, value) else TriggerEvent('esx_status:remove', name, -value) end
 	end
 end
 

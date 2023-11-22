@@ -1,4 +1,4 @@
-ESX.RegisterCommand('setcoords', 'admin', function(xPlayer, args, showError)
+ESX.RegisterCommand('tp', 'admin', function(xPlayer, args, showError)
 	xPlayer.setCoords({x = args.x, y = args.y, z = args.z})
 end, false, {help = TranslateCap('command_setcoords'), validate = true, arguments = {
 	{name = 'x', help = TranslateCap('command_setcoords_x'), type = 'number'},

@@ -41,11 +41,6 @@ local function playerDropped(source)
 
 	if inv?.player then
 		inv:closeInventory()
-
-		if shared.framework ~= 'esx' then
-			db.savePlayer(inv.owner, json.encode(inv:minimal()))
-		end
-
 		Inventory.Remove(inv)
 	end
 end

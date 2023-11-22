@@ -74,6 +74,21 @@ function math.tovector(input, min, max, round)
     error(('cannot convert %s to a vector value'):format(inputType), 2)
 end
 
+---Tries to convert a surface Normal to a Rotation.
+---@param input vector3
+---@return vector3
+function math.normaltorotation(input)
+    local inputType = type(input)
+
+    if inputType == 'vector3' then
+        local pitch = -math.asin(input.y) * (180.0 / math.pi)
+        local yaw = math.atan(input.x, input.z) * (180.0 / math.pi)
+        return vec3(pitch, yaw, 0.0)
+    end
+
+    error(('cannot convert type %s to a rotation vector'):format(inputType), 2)
+end
+
 ---Tries to convert its argument to a vector.
 ---@param input string | table
 ---@return number | vector2 | vector3 | vector4
@@ -86,8 +101,8 @@ end
 ---@param upper? boolean
 ---@return string
 function math.tohex(n, upper)
-    n = ('0x%x'):format(n)
-    return upper and n:upper() or n
+    local formatString = ('0x%s'):format(upper and '%X' or '%x')
+    return formatString:format(n)
 end
 
 ---Converts input number into grouped digits

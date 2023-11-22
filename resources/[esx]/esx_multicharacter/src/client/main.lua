@@ -303,24 +303,27 @@ if ESX.GetConfig().Multichar then
 			end)
 		end
 		if not isNew then
-			DoScreenFadeOut(100)
+			DoScreenFadeOut(0)
 		end
 		SetCamActive(cam, false)
-		RenderScriptCams(false, false, 0, true, true)
+		DestroyCam(cam)
 		cam = nil
-		SetEntityCoordsNoOffset(PlayerPedId(), spawn.x, spawn.y, spawn.z, false, false, false, true)
-		SetEntityHeading(PlayerPedId(), spawn.heading)
+		RenderScriptCams(false, false, 0, true, true)
+		if not isNew  then
+			exports['vms_spawnselector']:OpenSpawnSelector()
+		end
 		if not isNew then 
 			TriggerEvent('skinchanger:loadSkin', skin or Characters[spawned].skin) 
 			Wait(400)
 			DoScreenFadeIn(400)
-			exports['vms_spawnselector']:OpenSpawnSelector()
 			repeat Wait(200) until not IsScreenFadedOut()
 		end
 		TriggerServerEvent('esx:onPlayerSpawn')
 		TriggerEvent('esx:onPlayerSpawn')
 		TriggerEvent('playerSpawned')
-		TriggerEvent('esx:restoreLoadout')
+		if not isNew then
+			TriggerEvent('esx:restoreLoadout')
+		end
 		Characters, hidePlayers = {}, false
 	end)
 

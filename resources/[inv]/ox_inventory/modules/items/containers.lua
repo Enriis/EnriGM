@@ -63,16 +63,4 @@ setContainerProperties('pizzabox', {
 	whitelist = { 'pizza' }
 })
 
-setContainerProperties('phone', {
-	slots = 1,
-	maxWeight = 1000,
-	whitelist = { 'sim' }
-})
-
-setContainerProperties('portafoglio', {
-	slots = 5,
-	maxWeight = 1500,
-	whitelist = { 'patente', "documento", "money" }
-})
-
 return containers

@@ -55,6 +55,7 @@ function server.syncInventory(inv)
     end
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function server.buyLicense(inv, license)
@@ -116,4 +117,3 @@ function server.isPlayerBoss(playerId)
 
 	return xPlayer.job.grade_name == 'boss'
 end
-
