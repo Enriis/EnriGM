@@ -5,7 +5,7 @@ translate.select_category = 'SELEZIONE CATEGORIA'
 translate.height = 'ALTEZZA CAMERA'
 translate.rotate = 'OBRÓT KAMERY'
 translate.distance = 'ODLEGŁOŚĆ KAMERY'
-translate.save = 'ZAPISZ'
+translate.save = 'SALVA'
 translate.cancel = 'ANULUJ'
 
 translate.category = {

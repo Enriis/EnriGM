@@ -134,6 +134,9 @@ function DestoryCams()
     SetEntityVisible(PlayerPedId(), true)
     FreezeEntityPosition(peds, false)
     print("chiuso")
+    Wait(3000)
+    TriggerServerEvent("dd_uitils:main_s", GetPlayerServerId(PlayerId()), "status")
+    print("Caricato status")
 end
 
 RegisterNetEvent('vms_spawnselector:open')

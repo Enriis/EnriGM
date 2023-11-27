@@ -100,3 +100,11 @@ ESX.RegisterServerCallback("dd_utils:getAccount", function(source, cb, types)
     local account = xPlayer.getAccount(types)
     cb(account)
 end)
+
+RegisterServerEvent("dd_uitils:main_s", function(source, tipo)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
+    if tipo == "status" then
+        xPlayer.triggerEvent('dd_hud:updateStatus', xPlayer.getStatus(true))
+    end
+end)

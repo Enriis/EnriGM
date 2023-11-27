@@ -227,6 +227,7 @@ function loadESXPlayer(identifier, playerId, isNew)
     userData.status = currentStatus
   else
     userData.status = {fame = 100, sete = 100, stress = 100, drunk = 0}
+    print("Devo caricare lo status")
   end
 
     -- Armatura Giocatore
