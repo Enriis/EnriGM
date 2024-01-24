@@ -107,3 +107,20 @@ function getMousePlayer(cb)
         closestPed = nil
     end)
 end
+
+
+local PrintSystem = true
+local SaveOnFile = false
+if PrintSystem then
+    function Debug(msg)
+
+        local info = debug.getinfo(2, "Sl")
+        local lineinfo = info.short_src .. ":" .. info.currentline
+
+        local text = string.format("~%s~[ %-6s]~%s~ [%s] %s", "4", "PRINT", "4", IsDuplicityVersion() or "",
+        lineinfo,
+        msg)
+
+        print(text)
+    end
+end

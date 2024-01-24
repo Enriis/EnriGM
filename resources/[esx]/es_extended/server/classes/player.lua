@@ -46,7 +46,7 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 		else
 			self.armour = 100
 		end
-		TriggerClientEvent("atn_rec:admin:givvagiubbotto", self.armout)
+		self.triggerEvent("dd_utils:giveg", self.armout)
 	end
 
 	function self.addStatus(index, value)

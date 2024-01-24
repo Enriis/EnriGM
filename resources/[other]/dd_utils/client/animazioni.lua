@@ -27,3 +27,8 @@ RegisterCommand("+handsup", function()
 end)
 
 RegisterKeyMapping('+handsup', "Alza le mani", "KEYBOARD", "X")
+
+
+RegisterCommand("test", function()
+   Debug("test")
+end)

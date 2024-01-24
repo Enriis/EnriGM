@@ -33,7 +33,7 @@ end
 
 AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
     if playerId then
-
+        local xPlayer = ESX.GetPlayerFromId(playerId)
 
         -- Funziona primo evento playerLoaded  del server
 
@@ -99,12 +99,4 @@ ESX.RegisterServerCallback("dd_utils:getAccount", function(source, cb, types)
     local xPlayer = ESX.GetPlayerFromId(source)
     local account = xPlayer.getAccount(types)
     cb(account)
-end)
-
-RegisterServerEvent("dd_uitils:main_s", function(source, tipo)
-    local xPlayer = ESX.GetPlayerFromId(source)
-    if not xPlayer then return end
-    if tipo == "status" then
-        xPlayer.triggerEvent('dd_hud:updateStatus', xPlayer.getStatus(true))
-    end
 end)

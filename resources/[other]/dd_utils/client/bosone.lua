@@ -5,6 +5,8 @@
 --     TriggerServerEvent("en_borsone:giveItem", GetPlayerServerId(PlayerId()), GetPlayerServerId(PlayerId()))
 -- end)
 
+local outfitbag = nil
+
 local function CountBagOutfits(metas)
     local count = 0
     for k,v in pairs(metas) do
@@ -19,7 +21,42 @@ local function CountBagOutfits(metas)
     end
 end
 
+local function SpawnBorsone(types)
+
+    RequestModel("ba_prop_battle_bag_01a")
+    while not HasModelLoaded("ba_prop_battle_bag_01a") do
+        Wait(500)
+    end
+
+    if types == "spawn" then
+        local coords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 0.5, 0.0)
+        TaskPlayAnim(PlayerPedId(), "pickup_object", "pickup_low", 8.0, 8.0, 1000, 50, 0, false, false, false)
+        Wait(900    )
+        outfitbag = CreateObjectNoOffset("ba_prop_battle_bag_01a", coords.x, coords.y, coords.z, true, false)
+        PlaceObjectOnGroundProperly(outfitbag)
+
+        NetworkRegisterEntityAsNetworked(outfitbag)
+        SetNetworkIdCanMigrate(NetworkGetNetworkIdFromEntity(outfitbag), true)
+        
+        SetEntityAsMissionEntity(outfitbag, true, true)
+        SetEntityInvincible(outfitbag, false)
+        return true
+    elseif types == "remove" then
+        TaskPlayAnim(PlayerPedId(), "pickup_object", "pickup_low", 8.0, 8.0, 1000, 50, 0, false, false, false)
+        Wait(900)
+        DeleteEntity(outfitbag)
+        NetworkRemoveEntityArea(outfitbag)
+        ClearPedTasks(PlayerPedId())
+        outfitbag = nil
+        return false
+    end
+end
+
 RegisterNetEvent("en_borsone:apriMenu", function(metadata, slot)
+
+
+    if outfitbag then ESX.ShowNotification("Hai gia preso il borsone") return false end
+    SpawnBorsone("spawn")
     local elementi = {}
     if json.encode(metadata) ~= "[]" then
         elementi = {
@@ -33,9 +70,9 @@ RegisterNetEvent("en_borsone:apriMenu", function(metadata, slot)
     end
 
     ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'en_ioutfi_menu', {
-       title = 'Borsone',
-       align = 'top-left',
-       elements = elementi
+    title = 'Borsone',
+    align = 'top-left',
+    elements = elementi
     }, function(data, menu)
         local verifica = data.current.val
 
@@ -49,6 +86,7 @@ RegisterNetEvent("en_borsone:apriMenu", function(metadata, slot)
                     local pedComponents = exports['dd_skin']:getPedComponents(PlayerPedId())
                     local pedProps = exports['dd_skin']:getPedProps(PlayerPedId())
                     TriggerServerEvent("dd_borsone:saveOutfits", GetPlayerServerId(PlayerId()), slot, tostring(input[1]), pedModel, pedComponents, pedProps)
+                    SpawnBorsone("remove")
                     ESX.UI.Menu.CloseAll()
                 else
                     ESX.ShowNotification("Non hai dato un nome al vestito", "error")
@@ -60,6 +98,7 @@ RegisterNetEvent("en_borsone:apriMenu", function(metadata, slot)
 
         end, function(data, menu)
             menu.close()
+            SpawnBorsone("remove")
         end
     )
 end)

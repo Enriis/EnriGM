@@ -63,4 +63,10 @@ setContainerProperties('pizzabox', {
 	whitelist = { 'pizza' }
 })
 
+setContainerProperties('portafoglio', {
+	slots = 5,
+	maxWeight = 1500,
+	whitelist = { 'patente', "documento", "money" }
+})
+
 return containers

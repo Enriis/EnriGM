@@ -70,3 +70,8 @@ RegisterCommand("fr", function()
     FreezeEntityPosition(PlayerPedId(), false)
     SetCamActive(cam, false)
 end)
+
+-- RegisterNetEvent("dd_utils:giveg", function(val)
+--     SetPedArmour(PlayerPedId(), val)
+--     print("Impostata armatura val: "..val)
+-- end)

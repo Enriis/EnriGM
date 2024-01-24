@@ -54,71 +54,71 @@ AddEventHandler('esx:playerLoaded', function(xPlayer, isNew, skin)
 		NetworkSetFriendlyFireOption(true)
 	end
 
-		CreateThread(function()
-			local SetPlayerHealthRechargeMultiplier = SetPlayerHealthRechargeMultiplier
-			local BlockWeaponWheelThisFrame = BlockWeaponWheelThisFrame
-			local DisableControlAction = DisableControlAction
-			local IsPedArmed = IsPedArmed
-			local SetPlayerLockonRangeOverride = SetPlayerLockonRangeOverride
-			local DisablePlayerVehicleRewards = DisablePlayerVehicleRewards
-			local RemoveAllPickupsOfType = RemoveAllPickupsOfType
-			local HideHudComponentThisFrame = HideHudComponentThisFrame
-			local PlayerId = PlayerId()
-			local DisabledComps = {}
-			for i=1, #(Config.RemoveHudCommonents) do
-				if Config.RemoveHudCommonents[i] then
-					DisabledComps[#DisabledComps + 1] = i
-				end
-		 	end
-			while true do 
-				local Sleep = true
-
-				if Config.DisableHealthRegeneration then
-					Sleep = false
-					SetPlayerHealthRechargeMultiplier(PlayerId, 0.0)
-				end
-
-				if Config.DisableWeaponWheel then
-					Sleep = false
-					BlockWeaponWheelThisFrame()
-					DisableControlAction(0, 37,true)
-				end
-
-				if Config.DisableAimAssist then
-					Sleep = false
-					if IsPedArmed(ESX.PlayerData.ped, 4) then
-						SetPlayerLockonRangeOverride(PlayerId, 2.0)
-					end
-				end
-
-				if Config.DisableVehicleRewards then
-					Sleep = false
-					DisablePlayerVehicleRewards(PlayerId)
-				end
-			
-				if Config.DisableNPCDrops then
-					Sleep = false
-					RemoveAllPickupsOfType(0xDF711959) -- carbine rifle
-					RemoveAllPickupsOfType(0xF9AFB48F) -- pistol
-					RemoveAllPickupsOfType(0xA9355DCD) -- pumpshotgun
-				end
-
-				if #DisabledComps > 0 then
-					Sleep = false
-					for i=1, #(DisabledComps) do
-						HideHudComponentThisFrame(DisabledComps[i])
-					end
-				end
-				
-			Wait(Sleep and 1500 or 100)
+	CreateThread(function()
+		local SetPlayerHealthRechargeMultiplier = SetPlayerHealthRechargeMultiplier
+		local BlockWeaponWheelThisFrame = BlockWeaponWheelThisFrame
+		local DisableControlAction = DisableControlAction
+		local IsPedArmed = IsPedArmed
+		local SetPlayerLockonRangeOverride = SetPlayerLockonRangeOverride
+		local DisablePlayerVehicleRewards = DisablePlayerVehicleRewards
+		local RemoveAllPickupsOfType = RemoveAllPickupsOfType
+		local HideHudComponentThisFrame = HideHudComponentThisFrame
+		local PlayerId = PlayerId()
+		local DisabledComps = {}
+		for i=1, #(Config.RemoveHudCommonents) do
+			if Config.RemoveHudCommonents[i] then
+				DisabledComps[#DisabledComps + 1] = i
 			end
-		end)
-	StartServerSyncLoops()
+		end
+		while true do 
+			local Sleep = true
 
+			if Config.DisableHealthRegeneration then
+				Sleep = false
+				SetPlayerHealthRechargeMultiplier(PlayerId, 0.0)
+			end
+
+			if Config.DisableWeaponWheel then
+				Sleep = false
+				BlockWeaponWheelThisFrame()
+				DisableControlAction(0, 37,true)
+			end
+
+			if Config.DisableAimAssist then
+				Sleep = false
+				if IsPedArmed(ESX.PlayerData.ped, 4) then
+					SetPlayerLockonRangeOverride(PlayerId, 2.0)
+				end
+			end
+
+			if Config.DisableVehicleRewards then
+				Sleep = false
+				DisablePlayerVehicleRewards(PlayerId)
+			end
+		
+			if Config.DisableNPCDrops then
+				Sleep = false
+				RemoveAllPickupsOfType(0xDF711959) -- carbine rifle
+				RemoveAllPickupsOfType(0xF9AFB48F) -- pistol
+				RemoveAllPickupsOfType(0xA9355DCD) -- pumpshotgun
+			end
+
+			if #DisabledComps > 0 then
+				Sleep = false
+				for i=1, #(DisabledComps) do
+					HideHudComponentThisFrame(DisabledComps[i])
+				end
+			end
+			
+		Wait(Sleep and 1500 or 100)
+		end
+	end)
+
+	print("pt1")
 	Wait(2000)
 	print("[ES_EXTENDED] Armatura caricata con successo. Valore: "..xPlayer.armour)
 	SetPedArmour(PlayerPedId(), xPlayer.armour)
-
+	StartServerSyncLoops()
 end)
 
 RegisterNetEvent('esx:onPlayerLogout')
@@ -133,7 +133,6 @@ AddEventHandler('esx:setMaxWeight', function(newMaxWeight) ESX.SetPlayerData("ma
 local function onPlayerSpawn()
 	ESX.SetPlayerData('ped', PlayerPedId())
 	ESX.SetPlayerData('dead', false)
-	
 end
 
 AddEventHandler('playerSpawned', onPlayerSpawn)
@@ -217,7 +216,12 @@ AddEventHandler('esx:registerSuggestions', function(registeredCommands)
 end)
 
 
+RegisterNetEvent("dd_extended:startSync", function()
+end)
+
+
 function StartServerSyncLoops()
+	print("pt2")
 
 	-- sync current player coords with server
 	CreateThread(function()
