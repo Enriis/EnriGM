@@ -73,20 +73,17 @@
                         <a class="nav-item nav-link <%= activeTab === 'playerManager' ? 'active' : '' %>" id="nav-playerManager-tab" data-toggle="tab" href="#nav-playerManager"
                             role="tab" aria-controls="nav-playerManager" aria-selected="true">
                             Player Manager
-                            &nbsp; <span class="badge badge-danger">NEW</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-item nav-link <%= activeTab === 'discord' ? 'active' : '' %>" id="nav-discord-tab" data-toggle="tab" href="#nav-discord"
                             role="tab" aria-controls="nav-discord" aria-selected="true">
                             Discord
-                            &nbsp; <span class="badge badge-danger">NEW</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-item nav-link <%= activeTab === 'menu' ? 'active' : '' %>" id="nav-menu-tab" data-toggle="tab" href="#nav-menu" role="tab" aria-controls="nav-menu" aria-selected="true">
                             Game
-                            &nbsp; <span class="badge badge-danger">NEW</span>
                         </a>
                     </li>
                 </ul>
@@ -244,10 +241,10 @@
                             </label>
                             <div class="col-sm-9">
                                 <select class="form-control" id="frmMonitor-resourceStartingTolerance" <%= readOnly ? 'disabled' : '' %>>
-                                    <option value="90" <%= monitor.resourceStartingTolerance === '90' ? 'selected' : '' %>>1.5 minutes (default)</option>
-                                    <option value="180" <%= monitor.resourceStartingTolerance === '180' ? 'selected' : '' %>>3 minutes</option>
-                                    <option value="300" <%= monitor.resourceStartingTolerance === '300' ? 'selected' : '' %>>5 minutes</option>
-                                    <option value="600" <%= monitor.resourceStartingTolerance === '600' ? 'selected' : '' %>>10 minutes</option>
+                                    <option value="90" <%= monitor.resourceStartingTolerance === 90 ? 'selected' : '' %>>1.5 minutes (default)</option>
+                                    <option value="180" <%= monitor.resourceStartingTolerance === 180 ? 'selected' : '' %>>3 minutes</option>
+                                    <option value="300" <%= monitor.resourceStartingTolerance === 300 ? 'selected' : '' %>>5 minutes</option>
+                                    <option value="600" <%= monitor.resourceStartingTolerance === 600 ? 'selected' : '' %>>10 minutes</option>
                                 </select>
                                 <span class="form-text text-muted">
                                     At server boot, how much time to wait for any single resource to start before restarting the server. <br>
@@ -267,22 +264,6 @@
                                     The time MUST be in the 24-hour format with two digits for hours as well as
                                     minutes (<code>HH:MM</code>) and the times should be separated by commas. <br>
                                     <strong>Note:</strong> Make sure your schedule matches your server time and not your local time.
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">
-                                Disable Announcements
-                            </label>
-                            <div class="col-sm-9">
-                                <label class="c-switch c-switch-label c-switch-pill c-switch-success fix-pill-form">
-                                    <input class="c-switch-input" type="checkbox" id="frmMonitor-chatMessages"
-                                        <%= monitor.disableChatWarnings || '' %> <%= readOnly ? 'disabled' : '' %>>
-                                    <span class="c-switch-slider" data-checked="Yes" data-unchecked="No"></span>
-                                </label>
-                                <span class="form-text text-muted">
-                                    Check this if you want to disable broadcast warning messages in game before each scheduled restart.
                                 </span>
                             </div>
                         </div>
@@ -378,6 +359,27 @@
                         </div>
 
                         <div class="form-group row">
+                            <label for="frmPlayerManager-requiredBanHwidMatches" class="col-sm-3 col-form-label">
+                                Required Ban <br>
+                                HWID Matches
+                            </label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="frmPlayerManager-requiredBanHwidMatches" <%= readOnly ? 'disabled' : '' %>>
+                                    <option value="1" <%= playerDatabase.requiredBanHwidMatches === 1 ? 'selected' : '' %>>1 - recommended</option>
+                                    <option value="2" <%= playerDatabase.requiredBanHwidMatches === 2 ? 'selected' : '' %>>2 - lax</option>
+                                    <option value="3" <%= playerDatabase.requiredBanHwidMatches === 3 ? 'selected' : '' %>>3 - very lax</option>
+                                    <option value="4" <%= playerDatabase.requiredBanHwidMatches === 4 ? 'selected' : '' %>>4 - virtually disabled</option>
+                                    <option value="0" <%= playerDatabase.requiredBanHwidMatches === 0 ? 'selected' : '' %>>Disable HWID Bans</option>
+                                </select>
+                                <span class="form-text text-muted">
+                                    This option configures how many HWID tokens must match between a player and an existing ban for the player join to be blocked, or can disable HWID Bans entirely. <br>
+                                    Since Hardware ID Tokens are not guaranteed to be unique, there is the possibility of tokens from two players matching without them being related to each other. <br>
+                                    <strong>Note:</strong> Most players have 3 to 6 HWID tokens.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
                             <label for="frmPlayerManager-banRejectionMessage" class="col-sm-3 col-form-label">
                                 Ban Custom <br>
                                 Rejection Message
@@ -440,7 +442,7 @@
 
                         <div class="form-group row">
                             <label for="frmDiscord-guild" class="col-sm-3 col-form-label">
-                                Guild ID
+                                Guild/Server ID
                                 <span class="text-danger">*</span>
                             </label>
                             <div class="col-sm-9">
@@ -448,7 +450,7 @@
                                     value="<%= discord.guild || '' %>" 
                                     placeholder="000000000000000000" <%= readOnly ? 'disabled' : '' %>>
                                 <span class="form-text text-muted">
-                                    The ID of the Discord Guild of your server. <br>
+                                    The ID of the Discord Guild (also known as Discord Server). <br>
                                     To get the Guild ID, go to Discord's settings and
                                     <a href="https://support.discordapp.com/hc/article_attachments/115002742731/mceclip0.png"
                                     target="_blank" > enable developer mode</a>, then right-click on the guild icon select "Copy ID".
@@ -464,7 +466,7 @@
                                     placeholder="000000000000000000" <%= readOnly ? 'disabled' : '' %>>
                                 <span class="form-text text-muted">
                                     The ID of the channel to send Announcements (eg server restarts). <br>
-                                    Leave it blank to disable this feature. <br>
+                                    You can leave it blank to disable this feature. <br>
                                     To get the channel ID, go to Discord's settings and
                                     <a href="https://support.discordapp.com/hc/article_attachments/115002742731/mceclip0.png"
                                     target="_blank" > enable developer mode</a>, then right-click on the channel name and select "Copy ID".
@@ -494,10 +496,26 @@
                                 >
                                     <i class="icon-pencil"></i> Change Config JSON
                                 </button>
-                                <textarea id="frmDiscord-statusEmbedJson" class="d-none"><%= discord.embedJson || '' %></textarea>
-                                <textarea id="frmDiscord-statusEmbedConfigJson" class="d-none"><%= discord.embedConfigJson || '' %></textarea>
-                                <textarea id="frmDiscord-statusEmbedJsonDefault" class="d-none"><%= defaults.discord.embedJson || '' %></textarea>
-                                <textarea id="frmDiscord-statusEmbedConfigJsonDefault" class="d-none"><%= defaults.discord.embedConfigJson || '' %></textarea>
+                                <textarea
+                                    id="frmDiscord-statusEmbedJson"
+                                    class="d-none"
+                                    autocomplete="off"
+                                ><%= discord.embedJson || '' %></textarea>
+                                <textarea
+                                    id="frmDiscord-statusEmbedConfigJson"
+                                    class="d-none"
+                                    autocomplete="off"
+                                ><%= discord.embedConfigJson || '' %></textarea>
+                                <textarea
+                                    id="frmDiscord-statusEmbedJsonDefault"
+                                    class="d-none"
+                                    autocomplete="off"
+                                ><%= defaults.discord.embedJson || '' %></textarea>
+                                <textarea
+                                    id="frmDiscord-statusEmbedConfigJsonDefault"
+                                    class="d-none"
+                                    autocomplete="off"
+                                ><%= defaults.discord.embedConfigJson || '' %></textarea>
                                 <span class="form-text text-muted">
                                     The server status embed is customizable by editing the two JSONs above. <br>
                                     <strong>Note:</strong> Use the command <code>/status add</code> on a channel that the bot has the "Send Message" permission to setup the embed.
@@ -629,7 +647,7 @@
 
                         <div class="text-center mt-4">
                             <button class="btn btn-sm btn-primary" type="submit" id="frmMenu-save" <%= readOnly ? 'disabled' : '' %>>
-                                <i class="icon-check"></i> Save Menu Settings
+                                <i class="icon-check"></i> Save Game Settings
                             </button>
                         </div>
                     </div>
@@ -748,9 +766,8 @@
             url: '/settings/save/global',
             data: data,
             success: function (data) {
-                notify.update('progress', 0);
-                notify.update('type', data.type);
-                notify.update('message', data.message);
+                if (checkApiLogoutRefresh(data)) return;
+                updateMarkdownNotification(data, notify);
             },
             error: function (xmlhttprequest, textstatus, message) {
                 notify.update('progress', 0);
@@ -786,9 +803,8 @@
             url: '/settings/save/fxserver',
             data: data,
             success: function (data) {
-                notify.update('progress', 0);
-                notify.update('type', data.type);
-                notify.update('message', data.message);
+                if (checkApiLogoutRefresh(data)) return;
+                updateMarkdownNotification(data, notify);
             },
             error: function (xmlhttprequest, textstatus, message) {
                 notify.update('progress', 0);
@@ -806,6 +822,7 @@
             whitelistRejectionMessage: $('#frmPlayerManager-whitelistRejectionMessage').val().trim(),
             whitelistedDiscordRoles: $('#frmPlayerManager-whitelistedDiscordRoles').val().trim(),
             onJoinCheckBan: $('#frmPlayerManager-onJoinCheckBan').is(':checked'),
+            requiredBanHwidMatches: $('#frmPlayerManager-requiredBanHwidMatches').val(),
             banRejectionMessage: $('#frmPlayerManager-banRejectionMessage').val().trim(),
         }
         const notify = $.notify({ message: '<p class="text-center">Saving...</p>' }, {});
@@ -815,9 +832,8 @@
             url: '/settings/save/playerDatabase',
             data: data,
             success: function (data) {
-                notify.update('progress', 0);
-                notify.update('type', data.type);
-                notify.update('message', data.message);
+                if (checkApiLogoutRefresh(data)) return;
+                updateMarkdownNotification(data, notify);
             },
             error: function (xmlhttprequest, textstatus, message) {
                 notify.update('progress', 0);
@@ -841,9 +857,8 @@
             url: '/settings/save/monitor',
             data: data,
             success: function (data) {
-                notify.update('progress', 0);
-                notify.update('type', data.type);
-                notify.update('message', data.message);
+                if (checkApiLogoutRefresh(data)) return;
+                updateMarkdownNotification(data, notify);
             },
             error: function (xmlhttprequest, textstatus, message) {
                 notify.update('progress', 0);
@@ -906,15 +921,17 @@
     discEls.saveBtn.addEventListener('click', (e) => {
         if(jsonBeingEdited){
             const editorData = window.CMInstance.getValue();
-            try {
-                const parsed = JSON.parse(editorData);
-            } catch (error) {
-                const notify = $.notify(
-                    {message: `<b>Invalid JSON:</b><br>${error.message}`}, 
-                    {type: 'danger'}
-                );
-                return;
-            }
+            //NOTE: don't need this anymore since we are using jsonrepair on the backend
+            //It would be better to use it on the frontend, but no react, no luck.
+            // try {
+            //     const parsed = JSON.parse(editorData);
+            // } catch (error) {
+            //     const notify = $.notify(
+            //         {message: `<b>Invalid JSON:</b><br>${error.message}`}, 
+            //         {type: 'danger'}
+            //     );
+            //     return;
+            // }
             jsonBeingEdited.value = window.CMInstance.getValue();
             jsonBeingEdited = false;
         }
@@ -948,17 +965,23 @@
         if (data.enabled && (!data.token.length || !data.guild.length || !data.embedJson.length || !data.embedConfigJson.length)) {
             return $.notify({ message: 'The fields with "*" are required when the bot is enabled.' }, { type: 'warning' });
         }
-        const notify = $.notify({ message: '<p class="text-center">Saving...</p>' }, {});
+        const { notify , progressTimerId } = startHoldingNotify('Saving');
 
         txAdminAPI({
             type: "POST",
             url: '/settings/save/discord',
             data: data,
-            tiemout: REQ_TIMEOUT_LONG,
+            timeout: REQ_TIMEOUT_REALLY_REALLY_LONG,
             success: function (data) {
+                clearInterval(progressTimerId);
+                if (checkApiLogoutRefresh(data)) return;
                 updateMarkdownNotification(data, notify);
             },
             error: function (xmlhttprequest, textstatus, message) {
+                clearInterval(progressTimerId);
+                message = (message === 'timeout')
+                    ? 'The Discord API is taking too much time to respond.'
+                    : `XHR Error: ${message}`;
                 notify.update('progress', 0);
                 notify.update('type', 'danger');
                 notify.update('message', message);
@@ -996,9 +1019,8 @@
             url: '/settings/save/menu',
             data: data,
             success: function (data) {
-                notify.update('progress', 0);
-                notify.update('type', data.type);
-                notify.update('message', data.message);
+                if (checkApiLogoutRefresh(data)) return;
+                updateMarkdownNotification(data, notify);
             },
             error: function (xmlhttprequest, textstatus, message) {
                 notify.update('progress', 0);

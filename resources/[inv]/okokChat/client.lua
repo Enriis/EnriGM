@@ -28,6 +28,7 @@ AddEventHandler('chatMessage', function(author, color, text)
 end)
 
 AddEventHandler('__cfx_internal:serverPrint', function(msg)
+	print("SERVER: "..msg)
 	SendNUIMessage({
 		type = 'ON_MESSAGE',
 		message = {

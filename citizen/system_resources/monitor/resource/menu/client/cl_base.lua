@@ -6,25 +6,31 @@
 -- Global Variables
 -- TODO: they should be upper case
 menuIsAccessible = false
-isMenuDebug = false
 isMenuVisible = false
 menuPermissions = {}
 lastTpCoords = false;
-local isMenuEnabled = (GetConvar('txAdmin-menuEnabled', 'false') == 'true')
 
+-- Locals
+local noMenuReason = 'unknown reason'
+local awaitingReauth = false
 
--- Check if menu is in debug mode 
-CreateThread(function()
-  isMenuDebug = (GetConvar('txAdmin-menuDebug', 'false') == 'true')
-end)
+--- Logic to displaying the menu auth rejected snackbar
+local function displayAuthRejectedError()
+  if noMenuReason == 'admin_not_found' then
+    sendSnackbarMessage('error', 'nui_menu.misc.menu_not_admin', true)
+  else
+    sendSnackbarMessage('error', 'nui_menu.misc.menu_auth_failed', true, { reason = noMenuReason })
+  end
+end
 
+--- Tests for menu accessibility and displays error snackbar if needed
 local function checkMenuAccessible()
-  if not isMenuEnabled then
+  if not TX_MENU_ENABLED then
     sendSnackbarMessage('error', 'nui_menu.misc.not_enabled', true)
     return false
   end
   if not menuIsAccessible then
-    sendSnackbarMessage('error', 'nui_menu.misc.menu_not_allowed', true)
+    displayAuthRejectedError()
     return false
   end
 
@@ -60,26 +66,30 @@ end)
 -- =============================================
 --  The rest of the file will only run if menu is enabled
 -- =============================================
-if not isMenuEnabled then
-  return
-end
+
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
 
 -- Checking with server if we are an admin
-TriggerServerEvent('txsv:checkAdminStatus')
+TriggerServerEvent('txsv:checkIfAdmin')
 
--- Triggered as callback of txsv:checkAdminStatus
+-- Triggered as callback of txsv:checkIfAdmin
 RegisterNetEvent('txcl:setAdmin', function(username, perms, rejectReason)
   if type(perms) == 'table' then
-    print("^2[AUTH] logged in as '"..username.."' with perms: " .. json.encode(perms or "nil"))
+    debugPrint("^2[AUTH] logged in as '" .. username .. "' with perms: " .. json.encode(perms or "nil"))
     menuIsAccessible = true
     menuPermissions = perms
     RegisterKeyMapping('txadmin', 'Menu: Open Main Page', 'keyboard', '')
     RegisterKeyMapping('txAdmin:menu:openPlayersPage', 'Menu: Open Players page', 'KEYBOARD', '')
     RegisterKeyMapping('txAdmin:menu:noClipToggle', 'Menu: Toggle NoClip', 'keyboard', '')
     RegisterKeyMapping('txAdmin:menu:togglePlayerIDs', 'Menu: Toggle Player IDs', 'KEYBOARD', '')
-    RegisterKeyMapping('txAdmin:menu:endSpectate', 'Menu: Exit spectate mode', 'keyboard', 'BACK')
   else
-    print("^3[AUTH] rejected (" .. tostring(rejectReason) ..")")
+    noMenuReason = tostring(rejectReason)
+    debugPrint("^3[AUTH] rejected (" .. noMenuReason .. ")")
+    if awaitingReauth then
+      displayAuthRejectedError()
+      awaitingReauth = false
+    end
     menuIsAccessible = false
     menuPermissions = {}
   end
@@ -90,15 +100,19 @@ end)
 --[[ Debug Events / Commands ]]
 -- Command/event to trigger a authentication attempt
 local function retryAuthentication()
-  print("^5[AUTH] Retrying menu authentication.")
+  debugPrint("^5[AUTH] Retrying menu authentication.")
   menuIsAccessible = false
   menuPermissions = {}
   sendMenuMessage('resetSession')
   sendMenuMessage('setPermissions', menuPermissions)
-  TriggerServerEvent('txsv:checkAdminStatus')
+  TriggerServerEvent('txsv:checkIfAdmin')
 end
-RegisterCommand('txAdmin-reauth', retryAuthentication)
-RegisterNetEvent('txAdmin:menu:reAuth', retryAuthentication)
+RegisterNetEvent('txcl:reAuth', retryAuthentication)
+RegisterCommand('txAdmin-reauth', function ()
+  sendSnackbarMessage('info', 'Retrying menu authentication.', false)
+  awaitingReauth = true
+  retryAuthentication()
+end)
 
 
 -- Register chat suggestions
@@ -109,27 +123,20 @@ CreateThread(function()
     'chat:addSuggestion',
     '/tx',
     'Opens the main txAdmin Menu or specific for a player.',
-    {{ name="player ID/name", help="(Optional) Open player modal for specific ID or name." }}
+    { { name = "player ID/name", help = "(Optional) Open player modal for specific ID or name." } }
   )
   TriggerEvent(
     'chat:addSuggestion',
     '/txAdmin-reauth',
     'Retries to authenticate the menu NUI.'
   )
-  TriggerEvent(
-    'chat:addSuggestion',
-    '/txAdmin-debug',  -- on /scripts/menu/server/sv_base.lua
-    'Enables or disables the debug mode. Requires \'control.server\' permission.',
-    {{ name="1|0", help="1 to enable, 0 to disable" }}
-  )
 end)
 
 
 -- Will toggle debug logging
-RegisterNetEvent('txAdmin:events:setDebugMode', function(enabled)
-  isMenuDebug = enabled
-  debugModeEnabled = enabled
-  sendMenuMessage('setDebugMode', isMenuDebug)
+RegisterNetEvent('txcl:setDebugMode', function(enabled)
+  TX_DEBUG_MODE = enabled
+  sendMenuMessage('setDebugMode', TX_DEBUG_MODE)
 end)
 
 
@@ -147,15 +154,17 @@ RegisterNUICallback('focusInputs', function(shouldFocus, cb)
 end)
 
 
-RegisterNUICallback('reactLoaded', function(aaa, cb)
-  print("React loaded, sending variables.")
-  sendMenuMessage('setDebugMode', isMenuDebug)
-  sendMenuMessage('setPermissions', menuPermissions)
-  
+RegisterNUICallback('reactLoaded', function(_, cb)
+  debugPrint("React loaded, requesting ServerCtx.")
+
   CreateThread(function()
     updateServerCtx()
     while ServerCtx == false do Wait(0) end
+    debugPrint("ServerCtx loaded, sending variables.")
+    sendMenuMessage('setGameName', GAME_NAME)
+    sendMenuMessage('setDebugMode', TX_DEBUG_MODE)
     sendMenuMessage('setServerCtx', ServerCtx)
+    sendMenuMessage('setPermissions', menuPermissions)
   end)
 
   cb({})
@@ -171,12 +180,36 @@ RegisterNUICallback('closeMenu', function(_, cb)
 end)
 
 
---[[ Threads ]]
-CreateThread(function()
-  while true do
-    if isMenuVisible and IsPauseMenuActive() then
-      toggleMenuVisibility()
-    end
-    Wait(250)
+-- Audio play callback
+RegisterNUICallback('playSound', function(sound, cb)
+  playLibrarySound(sound)
+  cb({})
+end)
+
+-- Heals local player
+RegisterNetEvent('txcl:heal', function()
+  debugPrint('Received heal event, healing to full')
+  local ped = PlayerPedId()
+  local pos = GetEntityCoords(ped)
+  local heading = GetEntityHeading(ped)
+  if IsEntityDead(ped) then
+      NetworkResurrectLocalPlayer(pos[1], pos[2], pos[3], heading, false, false)
+  end
+  ResurrectPed(ped)
+  SetEntityHealth(ped, GetEntityMaxHealth(ped))
+  ClearPedBloodDamage(ped)
+  RestorePlayerStamina(PlayerId(), 100.0)
+  if IS_REDM then
+      Citizen.InvokeNative(0xC6258F41D86676E0, ped, 0, 100) -- SetAttributeCoreValue
+      Citizen.InvokeNative(0xC6258F41D86676E0, ped, 1, 100) -- SetAttributeCoreValue
+      Citizen.InvokeNative(0xC6258F41D86676E0, ped, 2, 100) -- SetAttributeCoreValue
+  end
+end)
+
+-- Tell the user he is an admin and that /tx is available
+AddEventHandler('playerSpawned', function()
+  Wait(15000)
+  if menuIsAccessible then
+      sendMenuMessage('showMenuHelpInfo', {})
   end
 end)

@@ -1,120 +1,147 @@
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
+
 -- =============================================
 --  Contains all spectate related logic
 -- =============================================
-if (GetConvar('txAdmin-menuEnabled', 'false') ~= 'true') then
-    return
+
+-- Control keys config
+local CONTROLS
+if IS_FIVEM then
+    CONTROLS = {
+        next = 187, --INPUT_FRONTEND_DOWN
+        prev = 188, --INPUT_FRONTEND_UP
+        exit = 194, --INPUT_FRONTEND_RRIGHT
+    }
+else
+    CONTROLS = {
+        next = 0x05CA7C52, --INPUT_FRONTEND_DOWN
+        prev = 0x6319DB71, --INPUT_FRONTEND_UP
+        exit = 0x156F7119, --INPUT_FRONTEND_CANCEL
+    }
 end
+
+
 -- Last spectate location stored in a vec3
-local lastSpectateLocation
+local spectatorReturnCoords
 -- Spectate mode
 local isSpectateEnabled = false
+-- Whether should we lock the camera to the target ped
+local isInTransitionState = false
 -- Spectated ped
 local storedTargetPed
 -- Spectated player's client ID
 local storedTargetPlayerId
--- Spectated players associated GameTag
-local storedGameTag
+-- Spectated players associated server id
+local storedTargetServerId
 
 
-RegisterNUICallback('spectatePlayer', function(data, cb)
-    TriggerServerEvent('txAdmin:menu:spectatePlayer', tonumber(data.id))
-    cb({})
-end)
-
-local function InstructionalButton(controlButton, text)
-    ScaleformMovieMethodAddParamPlayerNameString(controlButton)
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentScaleform(text)
-    EndTextCommandScaleformString()
-end
-
-local function createScaleformThread()
-    CreateThread(function()
-        -- yay, scaleforms
-        local scaleform = RequestScaleformMovie("instructional_buttons")
-        while not HasScaleformMovieLoaded(scaleform) do
-            Wait(1)
-        end
-        PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-        PopScaleformMovieFunctionVoid()
-
-        PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-        PushScaleformMovieFunctionParameterInt(200)
-        PopScaleformMovieFunctionVoid()
-
-        PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-        PushScaleformMovieFunctionParameterInt(1)
-        InstructionalButton(GetControlInstructionalButton(1, 194), "Exit Spectate Mode")
-        PopScaleformMovieFunctionVoid()
-
-
-        PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-        PopScaleformMovieFunctionVoid()
-
-        PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-        PushScaleformMovieFunctionParameterInt(0)
-        PushScaleformMovieFunctionParameterInt(0)
-        PushScaleformMovieFunctionParameterInt(0)
-        PushScaleformMovieFunctionParameterInt(80)
-        PopScaleformMovieFunctionVoid()
-
-        while isSpectateEnabled do
-            DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0)
-            Wait(0)
-        end
-        SetScaleformMovieAsNoLongerNeeded()
-    end)
-end
-
+--- Helper function to get coords under target
 local function calculateSpectatorCoords(coords)
-    return vec3(coords[1], coords[2], coords[3] - 15.0)
-end
-
---- Called every 50 frames in SpectateMode to determine whether or not to recreate the GamerTag
-local function createGamerTagInfo()
-    if storedGameTag and IsMpGamerTagActive(storedGameTag) then return end
-    local nameTag = ('[%d] %s'):format(GetPlayerServerId(storedTargetPlayerId), GetPlayerName(storedTargetPlayerId))
-    storedGameTag = CreateFakeMpGamerTag(storedTargetPed, nameTag, false, false, '', 0, 0, 0, 0)
-    SetMpGamerTagVisibility(storedGameTag, 2, 1)  --set the visibility of component 2(healthArmour) to true
-    SetMpGamerTagAlpha(storedGameTag, 2, 255) --set the alpha of component 2(healthArmour) to 255
-    SetMpGamerTagHealthBarColor(storedGameTag, 129) --set component 2(healthArmour) color to 129(HUD_COLOUR_YOGA)
-    SetMpGamerTagVisibility(storedGameTag, 4, NetworkIsPlayerTalking(i))
-    --debugPrint(('Created gamer tag for ped (%s), TargetPlayerID (%s)'):format(storedTargetPlayerId, storedTargetPlayerId))
-end
-
---- Called to cleanup Gamer Tag's once spectate mode is disabled
-local function clearGamerTagInfo()
-    if not storedGameTag then return end
-    RemoveMpGamerTag(storedGameTag)
-    storedGameTag = nil
+    return vec3(coords.x, coords.y, coords.z - 15.0)
 end
 
 --- Will freeze the player and set the entity to invisible
---- @param bool boolean - Whether we should prepare or cleanup
-local function preparePlayerForSpec(bool)
+--- @param enabled boolean - Whether we should prepare or cleanup
+local function prepareSpectatorPed(enabled)
     local playerPed = PlayerPedId()
-    FreezeEntityPosition(playerPed, bool)
-    SetEntityVisible(playerPed, not bool, 0)
+    FreezeEntityPosition(playerPed, enabled)
+    SetEntityVisible(playerPed, not enabled, 0)
+
+    if enabled then
+        TaskLeaveAnyVehicle(playerPed, 0, 16)
+    end
 end
 
-local function createSpectatorTeleportThread()
-    debugPrint('Starting teleporting follower thread')
-    CreateThread(function()
-        while isSpectateEnabled do
-            Wait(500)
+--- Will load collisions, tp the player, and fade screen
+--- The player should be frozen when calling this function
+--- @param coords table <string, number>
+--- @return nil
+local function collisionTpCoordTransition(coords)
+    debugPrint('Starting full collision teleport')
 
-            -- Check if ped still exists
+    -- Fade screen to black
+    if not IsScreenFadedOut() then DoScreenFadeOut(500) end
+    while not IsScreenFadedOut() do Wait(5) end
+
+    -- Teleport player back
+    local playerPed = PlayerPedId()
+    RequestCollisionAtCoord(coords.x, coords.y, coords.z)
+    SetEntityCoords(playerPed, coords.x, coords.y, coords.z)
+    local attempts = 0
+    while not HasCollisionLoadedAroundEntity(playerPed) do
+        Wait(5)
+        attempts = attempts + 1
+        if attempts > 1000 then
+            debugPrint('Failed to load collisions')
+            error()
+        end
+    end
+
+    debugPrint('Collisions loaded, player teleported')
+end
+
+--- Stops spectating
+local function stopSpectating()
+    debugPrint('Stopping spectate process init')
+    isSpectateEnabled = false
+    isInTransitionState = true
+
+    -- blackout screen
+    DoScreenFadeOut(500)
+    while not IsScreenFadedOut() do Wait(5) end
+
+    -- reset spectator
+    NetworkSetInSpectatorMode(false, nil)
+    if IS_FIVEM then
+        SetMinimapInSpectatorMode(false, nil)
+    end
+    if spectatorReturnCoords then
+        debugPrint('Returning spectator to original coords')
+        if not pcall(collisionTpCoordTransition, spectatorReturnCoords) then
+            debugPrint('collisionTpCoordTransition failed!')
+        end
+    else
+        debugPrint('No spectator return coords saved')
+    end
+    prepareSpectatorPed(false)
+    toggleShowPlayerIDs(false, false)
+
+    -- resetting cache + threads
+    storedTargetPed = nil
+    storedTargetPlayerId = nil
+    storedTargetServerId = nil
+    spectatorReturnCoords = nil
+
+    -- fading screen back & marking as done
+    DoScreenFadeIn(500)
+    while IsScreenFadingIn() do Wait(5) end
+    isInTransitionState = false
+
+    --logging that we stopped
+    TriggerServerEvent('txsv:req:spectate:end')
+end
+
+--- Starts the thread that continuously teleport the spectator under the target
+--- This is being done this way to make sure we are compatible with all VOIP resources
+--- In the future check if it's possible to migrate to using `SetFocusPosAndVel` instead.
+local function createSpectatorTeleportThread()
+    debugPrint('Starting teleport follower thread')
+    CreateThread(function()
+        local initialTargetServerid = storedTargetServerId
+        while isSpectateEnabled and storedTargetServerId == initialTargetServerid do
+            -- If ped doesn't exist anymore try to resolve it again
             if not DoesEntityExist(storedTargetPed) then
-                local _ped = GetPlayerPed(storedTargetPlayerId)
-                if _ped > 0 then
-                    if _ped ~= storedTargetPed then
-                        debugPrint(("Spectated player (%s) changed ped to %s"):format(storedTargetPlayerId, _ped))
-                        storedTargetPed = _ped
+                local newPed = GetPlayerPed(storedTargetPlayerId)
+                if newPed > 0 then
+                    if newPed ~= storedTargetPed then
+                        debugPrint(("Spectated target ped (%s) updated to %s"):format(storedTargetPlayerId, newPed))
                     end
-                    storedTargetPed = _ped
+                    storedTargetPed = newPed
                 else
+                    sendSnackbarMessage('error', 'nui_menu.player_modal.actions.interaction.notifications.spectate_failed', true)
                     debugPrint(("Spectated player (%s) no longer exists, ending spectate..."):format(storedTargetPlayerId))
-                    toggleSpectate(storedTargetPed, storedTargetPlayerId)
+                    stopSpectating()
                     break
                 end
             end
@@ -122,141 +149,210 @@ local function createSpectatorTeleportThread()
             -- Update Teleport
             local newSpectateCoords = calculateSpectatorCoords(GetEntityCoords(storedTargetPed))
             SetEntityCoords(PlayerPedId(), newSpectateCoords.x, newSpectateCoords.y, newSpectateCoords.z, 0, 0, 0, false)
+
+            Wait(500)
         end
     end)
 end
 
---- Will toggle spectate for a targeted ped
---- @param targetPed nil|number - The target ped when toggling on, can be nil when toggling off
-local function toggleSpectate(targetPed, targetPlayerId)
-    local playerPed = PlayerPedId()
 
-    if isSpectateEnabled then
-        isSpectateEnabled = false
+--- Cycles the spectate to next or previous player
+--- @param isNext boolean - If true, will spectate the next player in the list
+local function handleSpecCycle(isNext)
+    -- We don't want to cycle if the player is moving down the menu using arrow keys
+    -- or if pause is open, or if spectate isn't enabled
+    if isMenuVisible or IsPauseMenuActive() or not isSpectateEnabled then
+        return
+    end
+    if isInTransitionState then
+        return debugPrint('Currently in transition moment, cannot change target')
+    end
+    if storedTargetServerId == nil then
+        return debugPrint('Cannot cycle prev/next player because current one is not saved')
+    end
+    debugPrint(('Cycling spectate from target: %s, isNext: %s'):format(
+        tostring(storedTargetServerId),
+        tostring(isNext)
+    ))
+    TriggerServerEvent('txsv:req:spectate:cycle', storedTargetServerId, isNext)
+end
 
-        if not lastSpectateLocation then
-            error('Last location previous to spectate was not stored properly')
-        end
+-- Instructional stuff
+local keysTable = {
+    {'Exit Spectate', CONTROLS.exit},
+    {'Previous Player', CONTROLS.prev},
+    {'Next Player', CONTROLS.next},
+}
 
-        if not storedTargetPed then
-            error('Target ped was not stored to unspectate')
-        end
+local redmInstructionGroup, redmPromptTitle
+if IS_REDM then
+    redmPromptTitle = CreateVarString(10, 'LITERAL_STRING', 'Spectate')
+    redmInstructionGroup = makeRedmInstructionalGroup(keysTable)
+end
 
-        DoScreenFadeOut(500)
-        while not IsScreenFadedOut() do Wait(0) end
-
-        RequestCollisionAtCoord(lastSpectateLocation.x, lastSpectateLocation.y, lastSpectateLocation.z)
-        SetEntityCoords(playerPed, lastSpectateLocation.x, lastSpectateLocation.y, lastSpectateLocation.z)
-        -- The player is still frozen while we wait for collisions to load
-        while not HasCollisionLoadedAroundEntity(playerPed) do
-            Wait(5)
-        end
-        debugPrint('Collisions loaded around player')
-
-        preparePlayerForSpec(false)
-        debugPrint('Unfreezing current player')
-
-        NetworkSetInSpectatorMode(false, storedTargetPed)
-        debugPrint(('Set spectate to false for targetPed (%s)'):format(storedTargetPed))
-        clearGamerTagInfo()
-        DoScreenFadeIn(500)
-
-        storedTargetPed = nil
-    else
-        storedTargetPed = targetPed
-        storedTargetPlayerId = targetPlayerId
-        local targetCoords = GetEntityCoords(targetPed)
-        debugPrint(('Targets coords = x: %f, y: %f, z: %f'):format(targetCoords.x, targetCoords.y, targetCoords.z))
-
-        RequestCollisionAtCoord(targetCoords.x, targetCoords.y, targetCoords.z)
-        while not HasCollisionLoadedAroundEntity(targetPed) do
-            Wait(5)
-        end
-        debugPrint(('Collisions loaded around TargetPed (%s)'):format(targetPed))
-
-        NetworkSetInSpectatorMode(true, targetPed)
-        DoScreenFadeIn(500)
-        debugPrint(('Now spectating TargetPed (%s)'):format(targetPed))
-        isSpectateEnabled = true
-        createSpectatorTeleportThread()
-        createScaleformThread()
+--- Key press checking (fivem)
+local function fivemCheckControls()
+    if IsControlJustPressed(0, CONTROLS.next) then
+        handleSpecCycle(true)
+    end
+    if IsControlJustPressed(0, CONTROLS.prev) then
+        handleSpecCycle(false)
+    end
+    if IsControlJustPressed(0, CONTROLS.exit) then
+        stopSpectating()
     end
 end
 
-RegisterCommand('txAdmin:menu:endSpectate', function()
-    if isSpectateEnabled then
-        toggleSpectate(storedTargetPed)
-        preparePlayerForSpec(false)
-        TriggerServerEvent('txAdmin:menu:endSpectate')
+--- Key press checking (redm)
+local function redmCheckControls()
+    if PromptIsJustPressed(redmInstructionGroup.prompts['Next Player']) then
+        handleSpecCycle(true)
     end
+    if PromptIsJustPressed(redmInstructionGroup.prompts['Previous Player']) then
+        handleSpecCycle(false)
+    end
+    if PromptIsJustPressed(redmInstructionGroup.prompts['Exit Spectate']) then
+        debugPrint('exit spectate button pressed')
+        stopSpectating()
+    end
+end
+local checkControlsFunc = IS_FIVEM and fivemCheckControls or redmCheckControls
+
+
+--- Creates and draws the instructional scaleform
+local function createInstructionalThreads()
+    debugPrint('Starting instructional buttons thread')
+    --drawing thread
+    CreateThread(function()
+        local fivemScaleform = IS_FIVEM and makeFivemInstructionalScaleform(keysTable)
+        while isSpectateEnabled do
+            if IS_FIVEM then
+                DrawScaleformMovieFullscreen(fivemScaleform, 255, 255, 255, 255, 0)
+            else
+                PromptSetActiveGroupThisFrame(redmInstructionGroup.groupId, redmPromptTitle, 1, 0, 0, 0)
+            end
+            Wait(0)
+        end
+
+        --cleanup of the scaleform movie
+        if IS_FIVEM then
+            SetScaleformMovieAsNoLongerNeeded()
+        end
+        debugPrint('Finished drawer thread')
+    end)
+
+    --controls thread for redm - disabled when menu is visible
+    CreateThread(function()
+        while isSpectateEnabled do
+            if not isMenuVisible then
+                checkControlsFunc()
+            end
+            Wait(5)
+        end
+
+        debugPrint('Finished buttons checker thread')
+    end)
+end
+
+
+-- Register NUI callback
+RegisterNUICallback('spectatePlayer', function(data, cb)
+    TriggerServerEvent('txsv:req:spectate:start', tonumber(data.id))
+    cb({})
 end)
 
--- Run whenever we failed to resolve a target player to spectate
-local function cleanupFailedResolve()
-    local playerPed = PlayerPedId()
 
-    RequestCollisionAtCoord(lastSpectateLocation.x, lastSpectateLocation.y, lastSpectateLocation.z)
-    SetEntityCoords(playerPed, lastSpectateLocation.x, lastSpectateLocation.y, lastSpectateLocation.z)
-    -- The player is still frozen while we wait for collisions to load
-    while not HasCollisionLoadedAroundEntity(playerPed) do
-        Wait(5)
-    end
-    preparePlayerForSpec(false)
-
-    DoScreenFadeIn(500)
-
-    sendSnackbarMessage('error', 'nui_menu.player_modal.actions.interaction.notifications.spectate_failed', true)
-end
+-- Client-side event handler for failed cype (no next player or whatever)
+RegisterNetEvent('txcl:spectate:cycleFailed', function()
+    sendSnackbarMessage('error', 'nui_menu.player_modal.actions.interaction.notifications.spectate_cycle_failed', true)
+end)
 
 -- Client-side event handler for an authorized spectate request
-RegisterNetEvent('txAdmin:menu:specPlayerResp', function(targetServerId, coords)
-    local spectatorPed = PlayerPedId()
-    lastSpectateLocation = GetEntityCoords(spectatorPed)
+RegisterNetEvent('txcl:spectate:start', function(targetServerId, targetCoords)
+    if isInTransitionState then
+        stopSpectating()
+        error('Spectate request received while in transition state')
+    end
 
-    local targetPlayerId = GetPlayerFromServerId(targetServerId)
-    if targetPlayerId == PlayerId() then
+    -- check if self-spectate
+    if targetServerId == GetPlayerServerId(PlayerId()) then
         return sendSnackbarMessage('error', 'nui_menu.player_modal.actions.interaction.notifications.spectate_yourself', true)
     end
 
-    DoScreenFadeOut(500)
-    while not IsScreenFadedOut() do Wait(0) end
+    -- mark transitory state - locking the init of another spectate
+    isInTransitionState = true
 
-    local tpCoords = calculateSpectatorCoords(coords)
-    SetEntityCoords(spectatorPed, tpCoords.x, tpCoords.y, tpCoords.z, 0, 0, 0, false)
-    preparePlayerForSpec(true)
+    -- wiping any previous spectate cache
+    -- maybe not needed, but just to make sure
+    storedTargetPed = nil
+    storedTargetPlayerId = nil
+    storedTargetServerId = nil
 
-    --- We need to wait to make sure that the player is actually available once we teleport
-    --- this can take some time so we do this. Automatically breaks if a player isn't resolved
-    --- within 5 seconds.
-    local resolvePlayerAttempts = 0
-    local resolvePlayerFailed
+    -- saving current player coords and preparing ped
+    if spectatorReturnCoords == nil then
+        local spectatorPed = PlayerPedId()
+        spectatorReturnCoords = GetEntityCoords(spectatorPed)
+    end
+    prepareSpectatorPed(true)
 
-    repeat
-        if resolvePlayerAttempts > 100 then
-            resolvePlayerFailed = true
-            break;
-        end
-        Wait(50)
-        debugPrint('Waiting for player to resolve')
-        targetPlayerId = GetPlayerFromServerId(targetServerId)
-        resolvePlayerAttempts = resolvePlayerAttempts + 1
-    until (GetPlayerPed(targetPlayerId) > 0) and targetPlayerId ~= -1
-
-    if resolvePlayerFailed then
-        return cleanupFailedResolve()
+    -- teleport player under target and fade to black
+    debugPrint(('Targets coords = x: %f, y: %f, z: %f'):format(targetCoords.x, targetCoords.y, targetCoords.z))
+    local coordsUnderTarget = calculateSpectatorCoords(targetCoords)
+    if not pcall(collisionTpCoordTransition, coordsUnderTarget) then
+        debugPrint('collisionTpCoordTransition failed!')
+        stopSpectating()
+        return
     end
 
-    debugPrint('Target Ped successfully found!')
-    toggleSpectate(GetPlayerPed(targetPlayerId), targetPlayerId)
-end)
-
-CreateThread(function()
-    while true do
-        if isSpectateEnabled then
-            createGamerTagInfo()
-        else
-            clearGamerTagInfo()
-        end
+    -- resolving target and saving in cache
+    -- this will try for up to 15 seconds (redm is slow af)
+    local targetResolveAttempts = 0
+    local resolvedPlayerId = -1
+    local resolvedPed = 0
+    while (resolvedPlayerId <= 0 or resolvedPed <= 0) and targetResolveAttempts < 300 do
+        targetResolveAttempts = targetResolveAttempts + 1
+        resolvedPlayerId = GetPlayerFromServerId(targetServerId)
+        resolvedPed = GetPlayerPed(resolvedPlayerId)
         Wait(50)
     end
+
+    --If failed to resolve the targer
+    if (resolvedPlayerId <= 0 or resolvedPed <= 0) then
+        debugPrint('Failed to resolve target PlayerId or Ped')
+        -- reset spectator
+        if not pcall(collisionTpCoordTransition, spectatorReturnCoords) then
+            debugPrint('collisionTpCoordTransition failed!')
+        end
+        prepareSpectatorPed(false)
+        -- Fade screen back
+        DoScreenFadeIn(500)
+        while IsScreenFadedOut() do Wait(5) end
+        -- mark as finished
+        isInTransitionState = false
+        spectatorReturnCoords = nil
+        return sendSnackbarMessage('error', 'nui_menu.player_modal.actions.interaction.notifications.spectate_failed', true)
+    end
+
+    -- if player resolved
+    debugPrint('Resolved target player ped: ' .. tostring(resolvedPed))
+    storedTargetPed = resolvedPed
+    storedTargetPlayerId = resolvedPlayerId
+    storedTargetServerId = targetServerId
+
+    -- start spectating
+    NetworkSetInSpectatorMode(true, resolvedPed)
+    if IS_FIVEM then
+        SetMinimapInSpectatorMode(true, resolvedPed)
+    end
+    debugPrint(('Set spectate to true for resolvedPed (%s)'):format(resolvedPed))
+
+    isSpectateEnabled = true
+    isInTransitionState = false
+    toggleShowPlayerIDs(true, false)
+    createSpectatorTeleportThread()
+    createInstructionalThreads()
+
+    -- Fade screen back
+    DoScreenFadeIn(500)
+    while IsScreenFadedOut() do Wait(5) end
 end)

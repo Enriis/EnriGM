@@ -1,9 +1,9 @@
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
+
 -- =============================================
 --  Troll action logic from the player modal is located here (callbacks, events)
 -- =============================================
-if (GetConvar('txAdmin-menuEnabled', 'false') ~= 'true') then
-    return
-end
 
 local EFFECT_TIME_MS = GetConvarInt('txAdmin-menuDrunkDuration', 30)*1000
 local DRUNK_ANIM_SET = "move_m@drunk@verydrunk"
@@ -19,12 +19,11 @@ local DRUNK_DRIVING_EFFECTS = {
 
 local function getRandomDrunkCarTask()
     math.randomseed(GetGameTimer())
-
     return DRUNK_DRIVING_EFFECTS[math.random(#DRUNK_DRIVING_EFFECTS)]
 end
 
 -- NOTE: We might want to check if a player already has an effect
-local function drunkThread()
+local function drunkThreadFivem()
     local playerPed = PlayerPedId()
     local isDrunk = true
 
@@ -63,20 +62,40 @@ local function drunkThread()
     RemoveAnimSet(DRUNK_ANIM_SET)
 end
 
+local REDM_DRUNK_FX = 'PlayerDrunkAberdeen'
+local function drunkThreadRedm()
+    debugPrint('Starting drunk effect')
+    AnimpostfxPlay(REDM_DRUNK_FX)
+    Citizen.InvokeNative(0x406CCF555B04FAD3, PlayerPedId(), 1, 1.0) --SetPedDrunkness
+    Wait(EFFECT_TIME_MS)
+    debugPrint('Cleaning up drunk effect')
+    AnimpostfxStop(REDM_DRUNK_FX)
+    Citizen.InvokeNative(0x406CCF555B04FAD3, PlayerPedId(), 1, 0.0) --SetPedDrunkness
+end
+
 
 --[[ Wild Attack command ]]
-local attackAnimalHashes = {
-    GetHashKey("a_c_chimp"),
-    GetHashKey("a_c_rottweiler"),
-    GetHashKey("a_c_coyote")
-}
+local attackAnimals
+if IS_FIVEM then
+    attackAnimals = {
+        GetHashKey("a_c_chimp"),
+        GetHashKey("a_c_rottweiler"),
+        GetHashKey("a_c_coyote")
+    }
+else
+    attackAnimals = {
+        GetHashKey("a_c_wolf_small"),
+        GetHashKey("a_c_bearblack_01"),
+        GetHashKey("a_c_dogrufus_01")
+    }
+end
 local animalGroupHash = GetHashKey("Animal")
 local playerGroupHash = GetHashKey("PLAYER")
 
 local function startWildAttack()
     -- Consts
     local playerPed = PlayerPedId()
-    local animalHash = attackAnimalHashes[math.random(#attackAnimalHashes)]
+    local animalHash = attackAnimals[math.random(#attackAnimals)]
     local coordsBehindPlayer = GetOffsetFromEntityInWorldCoords(playerPed, 100, -15.0, 0)
     local playerHeading = GetEntityHeading(playerPed)
     local belowGround, groundZ, vec3OnFloor = GetGroundZAndNormalFor_3dCoord(coordsBehindPlayer.x, coordsBehindPlayer.y, coordsBehindPlayer.z)
@@ -84,12 +103,19 @@ local function startWildAttack()
     -- Requesting model
     RequestModel(animalHash)
     while not HasModelLoaded(animalHash) do
-        Wait(5)
+        Wait(15)
     end
-    SetModelAsNoLongerNeeded(animalHash)
 
-    -- Creating Animal & setting player as enemy
-    local animalPed = CreatePed(1, animalHash, coordsBehindPlayer.x, coordsBehindPlayer.y, groundZ, playerHeading, true, false)
+    -- Creating Animal
+    local animalPed
+    if IS_FIVEM then
+        animalPed = CreatePed(1, animalHash, coordsBehindPlayer.x, coordsBehindPlayer.y, groundZ, playerHeading, true, false)
+    else
+        animalPed = CreatePed(animalHash, coordsBehindPlayer.x, coordsBehindPlayer.y, groundZ, playerHeading, true, false)
+        Citizen.InvokeNative(0x77FF8D35EEC6BBC4, animalPed, 1, 0) --EquipMetaPedOutfitPreset
+    end
+
+    -- setting player as enemy
     SetPedFleeAttributes(animalPed, 0, 0)
     SetPedRelationshipGroupHash(animalPed, animalGroupHash)
     TaskSetBlockingOfNonTemporaryEvents(animalPed, true)
@@ -98,36 +124,43 @@ local function startWildAttack()
     TaskPutPedDirectlyIntoMelee(animalPed, playerPed, 0.0, -1.0, 0.0, 0)
     SetRelationshipBetweenGroups(5, animalGroupHash, playerGroupHash)
     SetRelationshipBetweenGroups(5, playerGroupHash, animalGroupHash)
+    SetModelAsNoLongerNeeded(animalHash)
 end
 -- RegisterCommand('atk', startWildAttack)
 
 
 --[[ Net Events ]]
-RegisterNetEvent('txAdmin:menu:drunkEffect', drunkThread)
+RegisterNetEvent('txcl:setDrunk', function()
+    if IS_FIVEM then
+        drunkThreadFivem()
+    else
+        drunkThreadRedm()
+    end
+end)
 
-RegisterNetEvent('txAdmin:menu:setOnFire', function()
+RegisterNetEvent('txcl:setOnFire', function()
     debugPrint('Setting player on fire')
     local playerPed = PlayerPedId()
     StartEntityFire(playerPed)
 end)
 
-RegisterNetEvent('txAdmin:menu:wildAttack', function()
+RegisterNetEvent('txcl:wildAttack', function()
     startWildAttack()
 end)
 
 
 --[[ NUI Callbacks ]]
 RegisterNUICallback('drunkEffectPlayer', function(data, cb)
-    TriggerServerEvent('txAdmin:menu:drunkEffectPlayer', tonumber(data.id))
+    TriggerServerEvent('txsv:req:troll:setDrunk', tonumber(data.id))
     cb({})
 end)
 
 RegisterNUICallback('setOnFire', function(data, cb)
-    TriggerServerEvent('txAdmin:menu:setOnFire', tonumber(data.id))
+    TriggerServerEvent('txsv:req:troll:setOnFire', tonumber(data.id))
     cb({})
 end)
 
 RegisterNUICallback('wildAttack', function(data, cb)
-    TriggerServerEvent('txAdmin:menu:wildAttack', tonumber(data.id))
+    TriggerServerEvent('txsv:req:troll:wildAttack', tonumber(data.id))
     cb({})
 end)

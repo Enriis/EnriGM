@@ -79,7 +79,7 @@ const drawHeatmap = (d3Container, perfData, options = {}) => {
         .domain([0, 1])
     const svg = d3.create("svg")
         .attr("viewBox", [0, 0, width, height]);
-    const bgColor = options.bgColor || d3.color(color(0)).darker(0.35);
+    const bgColor = options.bgColor || d3.color(color(0)).darker(1.35);
 
 
     // X Axis - Time
@@ -112,12 +112,12 @@ const drawHeatmap = (d3Container, perfData, options = {}) => {
 
     //Background
     svg.append('rect')
-    .attr('x', margin.left)
-    .attr('y', margin.top)
-    .attr('width', width - margin.right - margin.left)
-    .attr('height', height - margin.top - margin.bottom)
-    .attr('fill', bgColor)
-    .attr('stroke', bgColor)
+        .attr('x', margin.left)
+        .attr('y', margin.top)
+        .attr('width', width - margin.right - margin.left)
+        .attr('height', height - margin.top - margin.bottom)
+        .attr('fill', bgColor)
+        .attr('stroke', bgColor)
 
 
     // Drawing the Heatmap

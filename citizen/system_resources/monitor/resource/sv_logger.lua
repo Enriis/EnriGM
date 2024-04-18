@@ -1,10 +1,10 @@
+-- Prevent running in monitor mode
+if not TX_SERVER_MODE then return end
+
+
 -- =============================================
 --  Logger
 -- =============================================
---Check Environment
-if GetConvar('txAdminServerMode', 'false') ~= 'true' then
-    return
-end
 
 -- Micro optimization & variables
 local sub = string.sub
@@ -88,12 +88,12 @@ local function getLogPlayerName(src)
     end
 end
 
-AddEventHandler('txaLogger:menuEvent', function(source, event, allowed, data)
+AddEventHandler('txsv:logger:menuEvent', function(source, action, allowed, data)
     if not allowed then return end
     local message
-    
+
     --SELF menu options
-    if event == 'playerModeChanged' then
+    if action == 'playerModeChanged' then
         if data == 'godmode' then
             message = "enabled god mode"
         elseif data == 'noclip' then
@@ -106,51 +106,51 @@ AddEventHandler('txaLogger:menuEvent', function(source, event, allowed, data)
             message = "changed playermode to unknown"
         end
 
-    elseif event == 'teleportWaypoint' then
+    elseif action == 'teleportWaypoint' then
         message = "teleported to a waypoint"
 
-    elseif event == 'teleportCoords' then
+    elseif action == 'teleportCoords' then
         if type(data) ~= 'table' then return end
         local x = data.x
         local y = data.y
         local z = data.z
         message = ("teleported to coordinates (x=%.3f, y=%0.3f, z=%0.3f)"):format(x or 0.0, y or 0.0, z or 0.0)
 
-    elseif event == 'spawnVehicle' then
+    elseif action == 'spawnVehicle' then
         if type(data) ~= 'string' then return end
         message = "spawned a vehicle (model: " .. data .. ")"
 
-    elseif event == 'deleteVehicle' then
+    elseif action == 'deleteVehicle' then
         message = "deleted a vehicle"
 
-    elseif event == 'vehicleRepair' then
+    elseif action == 'vehicleRepair' then
         message = "repaired their vehicle"
 
-    elseif event == 'vehicleBoost' then
+    elseif action == 'vehicleBoost' then
         message = "boosted their vehicle"
 
-    elseif event == 'healSelf' then
+    elseif action == 'healSelf' then
         message = "healed themself"
 
-    elseif event == 'healAll' then
+    elseif action == 'healAll' then
         message = "healed all players!"
 
-    elseif event == 'announcement' then
+    elseif action == 'announcement' then
         if type(data) ~= 'string' then return end
         message = "made a server-wide announcement: " .. data
 
-    elseif event == 'clearArea' then
+    elseif action == 'clearArea' then
         if type(data) ~= 'number' then return end
         message = "cleared an area with ".. data .."m radius"
 
     --INTERACTION modal options
-    elseif event == 'spectatePlayer' then
+    elseif action == 'spectatePlayer' then
         message = 'started spectating player ' .. getLogPlayerName(data)
 
-    elseif event == 'freezePlayer' then
+    elseif action == 'freezePlayer' then
         message = 'toggled freeze on player ' .. getLogPlayerName(data)
 
-    elseif event == 'teleportPlayer' then
+    elseif action == 'teleportPlayer' then
         if type(data) ~= 'table' then return end
         local playerName = getLogPlayerName(data.target)
         local x = data.x or 0.0
@@ -158,23 +158,23 @@ AddEventHandler('txaLogger:menuEvent', function(source, event, allowed, data)
         local z = data.z or 0.0
         message = ("teleported to player %s (x=%.3f, y=%.3f, z=%.3f)"):format(playerName, x, y, z)
 
-    elseif event == 'healPlayer' then
+    elseif action == 'healPlayer' then
         message = "healed player " .. getLogPlayerName(data)
 
-    elseif event == 'summonPlayer' then
+    elseif action == 'summonPlayer' then
         message = "summoned player " .. getLogPlayerName(data)
 
     --TROLL modal options
-    elseif event == 'drunkEffect' then
+    elseif action == 'drunkEffect' then
         message = "triggered drunk effect on " .. getLogPlayerName(data)
 
-    elseif event == 'setOnFire' then
+    elseif action == 'setOnFire' then
         message = "set ".. getLogPlayerName(data) .." on fire" 
 
-    elseif event == 'wildAttack' then
+    elseif action == 'wildAttack' then
         message = "triggered wild attack on " .. getLogPlayerName(data)
 
-    elseif event == 'showPlayerIDs' then
+    elseif action == 'showPlayerIDs' then
         if type(data) ~= 'boolean' then return end
         if data then
             message = "turned show player IDs on"
@@ -184,15 +184,18 @@ AddEventHandler('txaLogger:menuEvent', function(source, event, allowed, data)
 
     --In case of unknown event
     else
-        logger(source, 'DebugMessage', "unknown menu event "..event)
+        logger(source, 'DebugMessage', "unknown menu event "..action)
         return
     end
 
-    logger(source, 'MenuEvent', message) --pass down event for stats collecting
+    logger(source, 'MenuEvent', {
+        action = action,
+        message = message
+    })
 end)
 
 -- Extra handlers
-RegisterNetEvent('txaLogger:DeathNotice', function(killer, cause)
+RegisterNetEvent('txsv:logger:deathEvent', function(killer, cause)
     local logData = {
         cause = cause,
         killer = killer
@@ -201,10 +204,12 @@ RegisterNetEvent('txaLogger:DeathNotice', function(killer, cause)
 end)
 
 --FIXME: deprecate or allow server commands
+--FIXME: didn't migrate to keep compatibility with external calls
 RegisterNetEvent('txaLogger:CommandExecuted', function(data)
     logger(source, 'CommandExecuted', data)
 end)
 
+--FIXME: didn't migrate to keep compatibility with external calls
 RegisterNetEvent('txaLogger:DebugMessage', function(data)
     logger(source, 'DebugMessage', data)
 end)
@@ -217,4 +222,4 @@ local function logChatMessage(src, author, text)
     logger(src, 'ChatMessage', logData)
 end
 RegisterNetEvent('chatMessage', logChatMessage)
-RegisterNetEvent('txaLogger:internalChatMessage', logChatMessage)
+AddEventHandler('txsv:logger:addChatMessage', logChatMessage)

@@ -1,9 +1,9 @@
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
+
 -- =============================================
 --  Client PlayerList handler
 -- =============================================
-if (GetConvar('txAdmin-menuEnabled', 'false') ~= 'true') then
-    return
-end
 
 -- Optimizations
 local tonumber = tonumber
@@ -48,7 +48,7 @@ end
 
 -- Triggered when the admin authenticates
 -- Replaces current playerlist
-RegisterNetEvent('txcl:setInitialPlayerlist', function(payload)
+RegisterNetEvent('txcl:plist:setInitial', function(payload)
     -- print("========== EVENT setInitialPlayerlist")
     -- print(json.encode(payload)) -- [[id, name]]
     -- print("------------------------------------")
@@ -74,12 +74,13 @@ end)
 --  > run through inbound playerlist updating existing data
 --  > try to get the dist from all players (susceptible to area culling, but that's fine)
 --  > TODO: decide what to do in case of missing or extra ids (missed updatePlayer?)
-RegisterNetEvent('txcl:setDetailedPlayerlist', function(players, admins)
+RegisterNetEvent('txcl:plist:setDetailed', function(players, admins)
     -- print("========== EVENT setDetailedPlayerlist")
     -- print(json.encode(players)) -- [[id, health, vType]]
     -- print("------------------------------------")
     local myID = GetPlayerServerId(PlayerId())
-    local myCoords = GetEntityCoords(PlayerPedId())
+    local myPed = PlayerPedId()
+    local myCoords = GetEntityCoords(myPed)
 
     for _, playerData in pairs(players) do
         local pid = playerData[1]
@@ -99,17 +100,27 @@ RegisterNetEvent('txcl:setDetailedPlayerlist', function(players, admins)
             LOCAL_PLAYERLIST[pids].vType = vTypeMap[tostring(playerData[3])] or "unknown"
         end
 
-        --Getting distance
+        -- Getting distance
+        -- NOTE: RedM doesn't save ped health data on server, so need to get locally
         if pid == myID then
             LOCAL_PLAYERLIST[pids].dist = 0
+            if IS_REDM then
+                LOCAL_PLAYERLIST[pids].health = GetPedHealthPercent(myPed)
+            end
         else
             local remotePlayer = GetPlayerFromServerId(pid)
             if remotePlayer == -1 then
                 LOCAL_PLAYERLIST[pids].dist = -1
+                if IS_REDM then
+                    LOCAL_PLAYERLIST[pids].health = -1
+                end
             else
                 local remotePed = GetPlayerPed(remotePlayer)
                 local remoteCoords = GetEntityCoords(remotePed)
                 LOCAL_PLAYERLIST[pids].dist = floor(#(myCoords - remoteCoords))
+                if IS_REDM then
+                    LOCAL_PLAYERLIST[pids].health = GetPedHealthPercent(remotePed)
+                end
             end
         end
     end
@@ -131,13 +142,13 @@ end)
 
 -- Triggered on player join/leave
 -- add/remove specific id to playerlist
-RegisterNetEvent('txcl:updatePlayer', function(id, data)
+RegisterNetEvent('txcl:plist:updatePlayer', function(id, data)
     local pids = tostring(id)
     if data == false then
-        debugPrint("^2txcl:updatePlayer: ^3"..id.."^2 disconnected")
+        debugPrint("^2txcl:plist:updatePlayer: ^3"..id.."^2 disconnected")
         LOCAL_PLAYERLIST[pids] = nil
     else
-        debugPrint("^2txcl:updatePlayer: ^3"..id.."^2 connected")
+        debugPrint("^2txcl:plist:updatePlayer: ^3"..id.."^2 connected")
         LOCAL_PLAYERLIST[pids] = {
             name = data,
             health = 0,
@@ -152,14 +163,14 @@ end)
 
 -- Triggered when the "player" tab opens in the menu, and every 5s after that
 RegisterNUICallback('signalPlayersPageOpen', function(_, cb)
-    TriggerServerEvent("txsv:getDetailedPlayerlist") --request latest from server
+    TriggerServerEvent('txsv:req:plist:getDetailed') --request latest from server
     cb({})
 end)
 
 
 -- DEBUG only
 -- RegisterCommand('tnew', function()
---     TriggerServerEvent("txsv:getDetailedPlayerlist")
+--     TriggerServerEvent('txsv:req:plist:getDetailed')
 -- end)
 -- RegisterCommand('tprint', function()
 --     print("------------------------------------")

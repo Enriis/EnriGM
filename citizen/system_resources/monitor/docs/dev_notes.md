@@ -1,84 +1,89 @@
 # TODO:
-- [x] QoL: add redirect post login if invalid session
-- [x] Improve discord embed UX:
-    - [x] embed placeholder
-    - [x] check for the emoji
-    - [x] check for the url fields
-    - [x] discord auth not admin response
-    - [x] bot save: intent message
-    - [x] bot save: could not resolve guild id = was the bot invited?
-    - [x] embed jsons reset buttons
-- [x] add superjump
-- [x] the PR about hiding notifications
-    - [x] remove monitor.disableChatWarnings
-- [x] At the schedule restart input prompt, add a note saying what is the current server time
-- [x] create events for dynamic scheduled restarts
-- [x] create new whitelist events
-    - [x] whitelistPlayer:
-        - action: added/removed
-        - license: xxxxx
-        - playerName: player name
-        - adminName: admin name
-    - [x] whitelistPreApproval:
-        - action: added/removed
-        - identifier: `discord:xxxxxx` / `license:xxxxx`
-        - playerName?: player name
-        - adminName: admin name
-    - [x] whitelistRequest:
-        - action: requested/approved/denied/deniedAll
-        - playerName?: player name, if action != deniedAll
-        - requestId?: Rxxxx, if action != deniedAll
-        - license?: xxxxxx, if action != deniedAll
-        - adminName?: admin name, if action != requested
-- [x] wav for announcements and DMs
-- [x] update status embed as soon as server status changes
+- [ ] xxx
 
-
-
-## Optional
-- [ ] bot: fix http agent options for localAddress
-- [ ] bot: add rate limit events to diagnostics page
-- [ ] change dashboard median player message
-    - top 1000: "your server seems to be in top 1000, join and type /server to track your progress"
-    - top 500: "you might be in top 500, join discord and see if you are eligible for the role"
-- [ ] update readme with new features and contributing warning
-- [ ] stats: 
-    - [ ] ????
-    - [ ] jwe
-
-
-# Next up:
+> next up
+- [ ] Add a tracking for % of redm/fivem/libertym servers to txTracker
+- [ ] maybe add some debug logging to `AdminVault.checkAdminsFile()`, to find out why so many people are having issues with their logins
+    - maybe even add to the login failed page something like "admin file was reset or modified XXX time ago"
+- [ ] Use q5/q95 from QuantileArrayOutput to help me define the buckets, then implement the join check time histogram
 - [ ] xxxxxx
-
-//essa logica não é "GetConvarBool" e sim negativa
-GetConvar\('([^']+)', 'false'\) ~= 'true'
-GetConvarBool('$1')
-
-function GetConvarBool(cvName)
-  return (GetConvar(cvName, 'false') ~= 'true')
-end
-
-criar variáveis globais setadas no shared, pra salvar o trabalho de dar GetConvar em todo arquivo
-
-===================
-### MUI update
-5.10.17 ok
-5.11.0 broken
-To test it, remove the `^`
-rm -rf node_modules/; npm i; npm list @mui/material; npm run dev:menu:game
-https://github.com/mui/material-ui/blob/master/CHANGELOG.md
-===================
 
 
 ### Server resource scanner
-ScanResourceRoot('C:/whatever/resources/', data => {
-    const fs = require('fs');
-    fs.writeFileSync('L:/tmp/ugh.json', JSON.stringify(data));
+ScanResourceRoot('E:/FiveM/txData/default.base/', (data: object) => {
+    console.dir(data);
 })
 
 
+### Zod error parsing
+if (error instanceof z.ZodError) {
+    const outString = error.issues.map(issue => {
+        return issue.path.length
+            ? `${issue.path.join('.')}: ${issue.message}`
+            : issue.message;
+    }).join('\n');
+    console.error(outString);
+    console.error(error.issues);
+} else {
+    console.dir(error);
+}
 
 
+
+txAdmin:events:menuAction
+- player: number
+- action: string
+- data?: object
+
+
+
+=======================================================================
+
+Perf charts:
+
+https://media.discordapp.net/attachments/1058975904811991080/1078919282924208238/image.png
+https://media.discordapp.net/attachments/589106731376836608/1108806732991430736/image.png
+https://media.discordapp.net/attachments/885648563105837116/1107449123881365565/image.png
+https://media.discordapp.net/attachments/885648563105837116/1107446997369241600/image.png
+https://cdn.discordapp.com/attachments/885648563105837116/1086875664432508968/image.png
+https://media.discordapp.net/attachments/885648563105837116/1080548734292742214/SPOILER_image.png
+https://media.discordapp.net/attachments/885648563105837116/1080493539374420049/image.png
+https://media.discordapp.net/attachments/885648563105837116/1079422080820453397/image.png
+https://media.discordapp.net/attachments/1044112583201927189/1109100201366528110/saS3WOdi.png
+https://media.discordapp.net/attachments/885648563105837116/1079097577288499420/image.png
+https://media.discordapp.net/attachments/885648563105837116/1059850236421492736/image.png
+https://media.discordapp.net/attachments/881583434802294894/1109145714824597575/image.png
+
+=======================================================================
+> FIXME: chat doesn't build, possibly docker image issue
+docker run \
+  -p 40121:40120 \
+  -p 30121:30120 -p 30121:30120/udp \
+  --name fxstest \
+  --volume "E:\\FiveM\\dockerFxserver":/fxserver \
+  -it ubuntu bash
+
+docker exec -it fxstest bash
+apt update
+apt install -y wget xz-utils nano iputils-ping bind9-host mycli
+
+mycli -u root -h 172.17.0.2
+
+cd /fxserver
+wget https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/6427-843247aae475eb586950a706015e89033e01b3f4/fx.tar.xz
+tar xvf fx.tar.xz
+
+=======================================================================
+
+(function() {
+    var s = document.createElement('script');
+    s.setAttribute('src', 'https://nthitz.github.io/turndownforwhatjs/tdfw.js');
+    document.body.appendChild(s);
+})()
+
+
+
+=======================================================================
 
 
 
@@ -89,38 +94,14 @@ teste:
 
 # TODO: sooner than later
 - [ ] server logger add events/min average
-- [ ] add lru-cache to `DiscordBot.resolveMember()`
-
 - [ ] no duplicated id type in bans? preparing for the new db migration
-- [ ] reorder `sv_main.lua` and add `local` prefix to most if not all functions
-- [ ] mock out insights page (assets + http reqs)
 - [ ] `cfg cyclical 'exec' command detected to file` should be blocking instead of warning. Behare that this is not trivial without also turning missing exec target read error also being error
 - [ ] maybe some sort of lockfile to admins.json file which would disable admin manager?
 
 
-----------------------------------------------------
+=======================================================================
 
 
-> Experiment: other than the color, on the perf chart we could draw likes for q50, q90, q99 tick times, maybe it's easier to understand
-```json
-[
-    0.6303839732888147,
-    0.1353923205342237,
-    0.14006677796327213,
-    0.09365609348914858,
-    0.000333889816360601,
-    0.0001669449081803005,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-]
-```
 
 > Maybe do this on the ban message page template
 ```css
@@ -133,8 +114,8 @@ background-position: right 15px bottom 15px;
 //Resource didn't finish starting (if res boot still active)
 `resource "${starting.startingResName}" failed to start within the [120~600]s time limit`
 
-//Resources started, but no heartbeat whithin limit after that
-`server failed to start within time limit - 30s after last resource started`
+//Resources started, but no heartbeat within limit after that
+`server failed to start within time limit - 45s after last resource started`
 
 //No resource started starting, hb over limit
 `server failed to start within time limit - ${this.hardConfigs.heartBeat.failLimit}s, no onResourceStarting received`
@@ -147,7 +128,7 @@ background-position: right 15px bottom 15px;
 'server hang detected'
 ```
 
-----------------------------------------------------
+=======================================================================
 
 ## New pages:
 Overview:
@@ -164,60 +145,30 @@ History:
 - filter by action type
 - filter by admin, and hotlink it from the admins page
 
-Whitelist Page/routes:
-- show pre approvals and requests in two tables
-- Routes:
-    - get returns
-        - whitelistRequests[]
-        - whitelistApprovals[]
-    - whitelistApprovals (add/remove)
-    - whitelistRequests (approve/deny)
+Whitelist:
+- maybe remove the wl pending join table
+- maybe make a "latest whitelists" showing both pending and members (query players + pending and join tables)
+- don't forget to keep the "add approval" button
+
+CFG Editor:
+- multiple cfg editors
+- add backup file to txdata, with the last 100 changes, name of the admin and timestamp
 
 
 
 ## The Big Things before ts+react rewrite:
 - [x] in-core playerlist state tracking
-- [ ] new proxy console util
-- [ ] global socket.io connection for playerlist + async responses
-- [ ] in-core resource state tracking
+- [x] new proxy console util
+- [x] global socket.io connection for playerlist + async responses
 - [ ] new config (prepared for multiserver)
 - [ ] multiserver tx instance (backend only)
 
 
-## Console Rewrite
-- [ ] Rewrite console logger module to be proxied to node:console
-- [ ] Add `[OUTDATED]` as a clog header prefix 
-- [ ] Move verbose to be part of the console (after the functional-ish change)
-- [ ] Remove the GlobalData from a bunch of files which include it just because of verbosity
-- [ ] Upgrade chalk, drop the chalk.keyword thing
-- [ ] Search for `node:console`, as i'm using it everywhere to test stuff
-- [ ] Migrate logger function to use the new logger component
-
-```js
-console.log('aaa', {àa:true});
-const {Console} = require('node:console');
-const ogConsole = new Console({
-    stdout: process.stdout,
-    stderr: process.stderr,
-    colorMode: true,
-});
-
-const chalk = require('chalk');
-const tag = chalk.bold.bgBlue(`[test]`)
-const testLog = (...args) => xxx.log.call(null, tag, ...args)
-
-testLog({àa:true});
-log('adsfsdf')
-
-import consoleFactory from '@utils/console.js';
-const console = consoleFactory(modulename)
-
-process.exit();
-```
-
-
 ## New config
-- 2023 acho que os defaults deveriam existir dentro dos components
+- july 2023: consider that some vars will be used in more than one component, so making them live in one or another might not be good
+- the modules should be the ones to decide when they need to refreshConfig, so inside the module constructor maybe subscribe to change of specific variables, (in or outside of module). Maybe use event dispatchers?!
+
+- early 2023: acho que os defaults deveriam existir dentro dos components
 e sempre que outro componente precisar saber uma config, deve passar pelo componente
 - need to have a version and have migration, like the database
 
@@ -299,8 +250,6 @@ Up next-ish:
 
 
 ### Randoms:
-- BUG: nui menu triggered announcements are not sent to the discord
-
 -- Why both have the same debug data? https://i.imgur.com/WGawiyr.png
 
 FIXME: sendMenuMessage('setServerCtx', ServerCtx)
@@ -365,11 +314,24 @@ Instance[]:
 - Scheduler
 - PlayerController > PlaylistManager
 - ResourcesManager
-- StatsCollector > StatsManager
+- StatisticsManager
 
 Questions:
 - How to make the database interface (currently in playerController)
 - Should break logger and config in 2 or work top->down?
+
+march/2023 insight:
+- if no `txData/config`
+- move the profile config and data to txdata
+- rename `txData/<profile>` to `txData/<profile>_bkp`
+- at run time:
+    - check if `txData/lock` exists
+    - if it doesn't
+        - save pid + interface + port to lock file
+    - if it does
+        - see if the pid is running
+        - say "you cant run two tx on the same txdata, open <url> to visit the other one"
+
 
 
 ### New UI stuff
@@ -380,9 +342,15 @@ https://auto-animate.formkit.com
 https://tanstack.com/virtual/v3
 
 For the tx ingame menu, replace actions grid with flexbox
-https://youtu.be/3elGSZSWTbM
-around 12:00
+https://youtu.be/3elGSZSWTbM around 12:00
+outro video com template completo, sem  https://youtu.be/YVI-q3idGiM
 https://immerjs.github.io/immer/ maybe?
+
+if tailwind, check https://daisyui.com/docs/themes/
+https://ui.shadcn.com/
+https://huemint.com/website-2/
+
+https://youtu.be/MnpuK0MK4yo
 
 
 ### Update Event + Rollout strategy
@@ -576,6 +544,10 @@ https://kinark.github.io/Materialize-stepper/
 
 https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 
+### RedM stuff
+https://github.com/femga/rdr3_discoveries
+https://vespura.com/doc/natives/
+
 
 =======================================
 
@@ -617,7 +589,8 @@ export TXADMIN_DEFAULT_LICENSE="cfxk_xxxxxxxxxxxxxxxxxxxx_xxxxx"
 npx depcheck
 npm-upgrade
 con_miniconChannels script:monitor*
-+setr txAdmin-menuDebug true
+con_miniconChannels script:runcode
++setr txAdmin-debugMode true
 nui_devtoold mpMenu
 
 # hang fxserver (runcode)

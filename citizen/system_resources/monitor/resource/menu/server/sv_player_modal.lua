@@ -1,7 +1,7 @@
---Check Environment
-if GetConvar('txAdminServerMode', 'false') ~= 'true' then
-  return
-end
+-- Prevent running in monitor mode
+if not TX_SERVER_MODE then return end
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
 
 -- =============================================
 --  This file is for general server side handlers
@@ -9,7 +9,7 @@ end
 --  "Player Modal"
 -- =============================================
 
-RegisterNetEvent('txAdmin:menu:tpToPlayer', function(tgtId)
+RegisterNetEvent('txsv:req:tpToPlayer', function(tgtId)
   local src = source
 
   if type(tgtId) ~= 'number' then
@@ -38,14 +38,14 @@ RegisterNetEvent('txAdmin:menu:tpToPlayer', function(tgtId)
       data.x = coords[1]
       data.y = coords[2]
       data.z = coords[3]
-      TriggerClientEvent('txAdmin:menu:tpToCoords', src, data.x, data.y, data.z)
+      TriggerClientEvent('txcl:tpToCoords', src, data.x, data.y, data.z)
     end
   end
 
-  TriggerEvent('txaLogger:menuEvent', src, 'teleportPlayer', allow, data)
+  TriggerEvent('txsv:logger:menuEvent', src, 'teleportPlayer', allow, data)
 end)
 
-RegisterNetEvent('txAdmin:menu:summonPlayer', function(id)
+RegisterNetEvent('txsv:req:bringPlayer', function(id)
   local src = source
   if type(id) ~= 'number' then
     return
@@ -56,8 +56,8 @@ RegisterNetEvent('txAdmin:menu:summonPlayer', function(id)
     local ped = GetPlayerPed(id)
     if ped then
       local coords = GetEntityCoords(GetPlayerPed(src))
-      TriggerClientEvent('txAdmin:menu:tpToCoords', id, coords[1], coords[2], coords[3])
+      TriggerClientEvent('txcl:tpToCoords', id, coords[1], coords[2], coords[3])
     end
   end
-  TriggerEvent('txaLogger:menuEvent', src, 'summonPlayer', allow, id)
+  TriggerEvent('txsv:logger:menuEvent', src, 'summonPlayer', allow, id)
 end)

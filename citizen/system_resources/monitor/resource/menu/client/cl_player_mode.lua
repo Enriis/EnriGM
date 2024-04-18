@@ -1,14 +1,14 @@
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
+
 -- ===============
 --  This file contains functionality purely related
---  to player modes (noclip, godmode)
+--  to player modes (noclip, godmode, super jump)
 -- ===============
-if (GetConvar('txAdmin-menuEnabled', 'false') ~= 'true') then
-    return
-end
 
 local noClipEnabled = false
 local superJumpEnabled = false
-
+local moveRateOverride = IS_FIVEM and 1.75 or 1.15
 local function toggleSuperJump(enabled)
     superJumpEnabled = enabled
     if enabled then
@@ -16,21 +16,22 @@ local function toggleSuperJump(enabled)
         CreateThread(function()
             local Wait = Wait
             local pid = PlayerId()
-            SetRunSprintMultiplierForPlayer(pid, 1.49)
+            local ped = PlayerPedId()
+            -- loop to keep player fast
             local frameCounter = 0
             while superJumpEnabled do
                 frameCounter = frameCounter + 1
-                if frameCounter > 250 then
+                if frameCounter > 200 then
                     RestorePlayerStamina(pid, 100.0)
+                    ped = PlayerPedId()
                     frameCounter = 0
                 end
+                SetPedMoveRateOverride(ped, moveRateOverride)
                 SetSuperJumpThisFrame(pid)
                 Wait(0)
             end
-          end)
+        end)
     else
-        local pid = PlayerId()
-        SetRunSprintMultiplierForPlayer(pid, 1.0)
         clearPersistentAlert('superJumpEnabled')
     end
 end
@@ -46,6 +47,8 @@ local function toggleGodMode(enabled)
 end
 
 local freecamVeh = 0
+local isVehAHorse = false
+local setLocallyInvisibleFunc = IS_FIVEM and SetEntityLocallyInvisible or SetPlayerInvisibleLocally
 local function toggleFreecam(enabled)
     noClipEnabled = enabled
     local ped = PlayerPedId()
@@ -55,9 +58,19 @@ local function toggleFreecam(enabled)
 
     if enabled then
         freecamVeh = GetVehiclePedIsIn(ped, false)
+        if IsPedOnMount(ped) then
+            isVehAHorse = true
+            freecamVeh = GetMount(ped)
+        end
         if freecamVeh > 0 then
             NetworkSetEntityInvisibleToNetwork(freecamVeh, true)
             SetEntityCollision(freecamVeh, false, false)
+            SetEntityVisible(freecamVeh, false)
+            FreezeEntityPosition(freecamVeh, true)
+            if not isVehAHorse then
+                SetVehicleCanBreak(freecamVeh, false)
+                SetVehicleWheelsCanBreak(freecamVeh, false)
+            end
         end
     end
 
@@ -69,10 +82,10 @@ local function toggleFreecam(enabled)
 
         Citizen.CreateThread(function()
             while IsFreecamActive() do
-                SetEntityLocallyInvisible(ped)
+                setLocallyInvisibleFunc(ped, true)
                 if freecamVeh > 0 then
                     if DoesEntityExist(freecamVeh) then
-                        SetEntityLocallyInvisible(freecamVeh)
+                        setLocallyInvisibleFunc(freecamVeh, true) -- only works for players in RedM, but to prevent errors.
                     else
                         freecamVeh = 0
                     end
@@ -80,23 +93,40 @@ local function toggleFreecam(enabled)
                 Wait(0)
             end
 
-            if not DoesEntityExist(freecamVeh) then
-                freecamVeh = 0
-            end
-            if freecamVeh > 0 then
+            if freecamVeh > 0 and DoesEntityExist(freecamVeh) then
                 local coords = GetEntityCoords(ped)
                 NetworkSetEntityInvisibleToNetwork(freecamVeh, false)
+                SetEntityCoords(freecamVeh, coords[1], coords[2], coords[3], false, false, false, false)
+                SetVehicleOnGroundProperly(freecamVeh)
                 SetEntityCollision(freecamVeh, true, true)
-                SetEntityCoords(freecamVeh, coords[1], coords[2], coords[3])
-                SetPedIntoVehicle(ped, freecamVeh, -1)
-                freecamVeh = 0
+                SetEntityVisible(freecamVeh, true)
+                FreezeEntityPosition(freecamVeh, false)
+
+                if isVehAHorse then
+                    Citizen.InvokeNative(0x028F76B6E78246EB, ped, freecamVeh, -1) --SetPedOntoMount
+                else
+                    SetEntityAlpha(freecamVeh, 125)
+                    SetPedIntoVehicle(ped, freecamVeh, -1)
+                    local persistVeh = freecamVeh --since freecamVeh is erased down below
+                    CreateThread(function()
+                        Wait(2000)
+                        ResetEntityAlpha(persistVeh)
+                        SetVehicleCanBreak(persistVeh, true)
+                        SetVehicleWheelsCanBreak(persistVeh, true)
+                    end)
+                end
             end
+            freecamVeh = 0
         end)
     end
 
     local function disableNoClip()
         SetFreecamActive(false)
-        SetGameplayCamRelativeHeading(0)
+        if IS_FIVEM then
+            SetGameplayCamRelativeHeading(0)
+        else
+            Citizen.InvokeNative(0x14F3947318CA8AD2, 0.0, 0.0) -- SetThirdPersonCamRelativeHeadingLimitsThisUpdate
+        end
     end
 
     if not IsFreecamActive() and enabled then
@@ -111,10 +141,18 @@ local function toggleFreecam(enabled)
 end
 
 
-local PTFX_ASSET = 'ent_dst_elec_fire_sp'
-local PTFX_DICT = 'core'
-local LOOP_AMOUNT = 25
-local PTFX_DURATION = 1000
+local PTFX_DICT, PTFX_ASSET, LOOP_AMOUNT, PTFX_DURATION
+if IS_FIVEM then
+    PTFX_DICT = 'core'
+    PTFX_ASSET = 'ent_dst_elec_fire_sp'
+    LOOP_AMOUNT = 25
+    PTFX_DURATION = 1000
+else
+    PTFX_DICT = 'core'
+    PTFX_ASSET = 'fire_wrecked_hot_air_balloon'
+    LOOP_AMOUNT = 10
+    PTFX_DURATION = 850
+end
 
 -- Applies the particle effect to a ped
 local function createPlayerModePtfxLoop(tgtPedId)
@@ -129,8 +167,8 @@ local function createPlayerModePtfxLoop(tgtPedId)
 
         local particleTbl = {}
 
-        for i=0, LOOP_AMOUNT do
-            UseParticleFxAssetNextCall(PTFX_DICT)
+        for i = 0, LOOP_AMOUNT do
+            UseParticleFxAsset(PTFX_DICT)
             local partiResult = StartParticleFxLoopedOnEntity(PTFX_ASSET, tgtPedId, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5, false, false, false)
             particleTbl[#particleTbl + 1] = partiResult
             Wait(0)
@@ -143,7 +181,7 @@ local function createPlayerModePtfxLoop(tgtPedId)
     end)
 end
 
-RegisterNetEvent('txcl:syncPtfxEffect', function(tgtSrc)
+RegisterNetEvent('txcl:showPtfx', function(tgtSrc)
     debugPrint('Syncing particle effect for target netId')
     local tgtPlayer = GetPlayerFromServerId(tgtSrc)
     if tgtPlayer == -1 then return end
@@ -161,7 +199,7 @@ local function askChangePlayerMode(mode)
         nearbyPlayers[#nearbyPlayers + 1] = GetPlayerServerId(player)
     end
 
-    TriggerServerEvent('txAdmin:menu:playerModeChanged', mode, nearbyPlayers)
+    TriggerServerEvent('txsv:req:changePlayerMode', mode, nearbyPlayers)
 end
 
 -- NoClip toggle keybind
@@ -180,8 +218,8 @@ RegisterNUICallback('playerModeChanged', function(mode, cb)
 end)
 
 -- [[ Player mode changed cb event ]]
-RegisterNetEvent('txAdmin:menu:playerModeChanged', function(mode, ptfx)
-    if ptfx then 
+RegisterNetEvent('txcl:setPlayerMode', function(mode, ptfx)
+    if ptfx then
         createPlayerModePtfxLoop(PlayerPedId())
     end
 
@@ -203,4 +241,3 @@ RegisterNetEvent('txAdmin:menu:playerModeChanged', function(mode, ptfx)
         toggleSuperJump(false)
     end
 end)
-

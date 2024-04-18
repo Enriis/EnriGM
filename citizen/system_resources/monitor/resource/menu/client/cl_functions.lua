@@ -24,9 +24,19 @@ end
 --- Snackbar message
 ---@param level string The severity of the message can be 'info', 'error', or 'warning'
 ---@param message string Message to display with snackbar
-function sendSnackbarMessage(level, message, isTranslationKey)
+---@param isTranslationKey boolean
+---@param tOptions table | nil
+function sendSnackbarMessage(level, message, isTranslationKey, tOptions)
     debugPrint(('Sending snackbar message, level: %s, message: %s, isTranslationKey: %s'):format(level, message, isTranslationKey))
-    sendMenuMessage('setSnackbarAlert', { level = level, message = message, isTranslationKey = isTranslationKey })
+    sendMenuMessage(
+        'setSnackbarAlert',
+        {
+            level = level,
+            message = message,
+            isTranslationKey = isTranslationKey,
+            tOptions = tOptions
+        }
+    )
 end
 
 --- Send data to the NUI frame
@@ -37,6 +47,19 @@ function sendMenuMessage(action, data)
         action = action,
         data = data
     })
+end
+
+--- Close the menu if pause menu is opened using the default P key
+local function createPauseMenuCheckerThread()
+    debugPrint('Starting pause menu checker thread')
+    CreateThread(function()
+        while isMenuVisible do
+            if IsPauseMenuActive() then
+                toggleMenuVisibility(false)
+            end
+            Wait(250)
+        end
+    end)
 end
 
 --- Toggle visibility of the txAdmin NUI menu
@@ -58,12 +81,14 @@ function toggleMenuVisibility(visible)
         isMenuVisible = not isMenuVisible
         sendMenuMessage('setVisible', isMenuVisible)
     end
+    createPauseMenuCheckerThread()
+
     -- check if noclip and spectate still works with menu closed
     if not isMenuVisible then
         SetNuiFocus(false)
         SetNuiFocusKeepInput(false)
     end
-    PlaySoundFrontend(-1, SoundEnum['enter'], 'HUD_FRONTEND_DEFAULT_SOUNDSET', 1)
+    playLibrarySound('enter')
 end
 
 --- Calculate a safe Z coordinate based off the (X, Y)
@@ -75,7 +100,7 @@ function FindZForCoords(x, y)
     local START_Z = 1500
     local z = START_Z
     while found and z > 0 do
-        local _found, _z = GetGroundZFor_3dCoord(x + 0.0, y + 0.0, z - 1.0)
+        local _found, _z = GetGroundZAndNormalFor_3dCoord(x + 0.0, y + 0.0, z - 1.0)
         if _found then
             z = _z + 0.0
         end
@@ -104,7 +129,7 @@ function DoesPlayerHavePerm(perms, perm)
     if type(perms) ~= 'table' then
         return false
     end
-    
+
     for _, v in pairs(perms) do
         if v == perm or v == 'all_permissions' then
             return true
@@ -112,4 +137,28 @@ function DoesPlayerHavePerm(perms, perm)
     end
 
     return false
+end
+
+-- Sound libraries
+local fivemSoundLibrary = {
+    move = {'NAV_UP_DOWN', 'HUD_FRONTEND_DEFAULT_SOUNDSET'},
+    enter = {'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET'},
+    confirm = {'CONFIRM_BEEP', 'HUD_MINI_GAME_SOUNDSET'},
+}
+local redmSoundLibrary = {
+    move = {'round_start_countdown_tick', 'RDRO_Poker_Sounds'},
+    enter = {'BET_PROMPT', 'HUD_POKER'},
+    confirm = {'BULLSEYE', 'FMA_ARCHERY_Sounds'},
+}
+
+--- Used to play UI sounds
+---@param sound string
+function playLibrarySound(sound)
+    if IS_FIVEM then
+        PlaySoundFrontend(-1, fivemSoundLibrary[sound][1], fivemSoundLibrary[sound][2], 1)
+    else
+        Citizen.InvokeNative(0x9D746964E0CF2C5F, redmSoundLibrary[sound][1], redmSoundLibrary[sound][2])  -- ReleaseShardSounds
+        Wait(0)
+        PlaySoundFrontend(redmSoundLibrary[sound][1], redmSoundLibrary[sound][2], true, 1);
+    end
 end

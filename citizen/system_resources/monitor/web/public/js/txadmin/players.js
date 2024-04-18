@@ -2,9 +2,7 @@
 //============================================== Playerlist
 //================================================================
 //Vars and elements
-let currServerMutex = false;
-let cachedPlayers = [];
-let biggestPlayerID = 0;
+let biggestIdLength = 1;
 const playerlistElement = document.getElementById('playerlist');
 const plistMsgElement = document.getElementById('playerlist-message');
 const plistCountElement = document.getElementById('plist-count');
@@ -18,6 +16,7 @@ function applyPlayerlistFilter() {
         if (
             search == ''
             || (typeof el.dataset['pname'] == 'string' && el.dataset['pname'].includes(search))
+            || (typeof el.dataset['netid'] == 'string' && el.dataset['netid'].includes(search))
         ) {
             el.hidden = false;
         } else {
@@ -44,79 +43,98 @@ if (plistSearchElement) plistSearchElement.addEventListener('input', function (e
 // });
 
 //Handle Remove, Add and Update playerlist
-function removePlayer(player) {
-    document.getElementById(`divPlayer${player.netid}`).remove();
+function getPaddedPlayerId(netid) {
+    return `[${netid}]`.padStart(biggestIdLength + 2, 'x').replace(/x/g, '&nbsp;');
+}
+
+function makePlayerDiv(player) {
+    const el = document.createElement("div");
+    el.classList.add('list-group-item', 'list-group-item-accent-secondary', 'player', 'text-truncate');
+    el.id = `divPlayer${player.netid}`;
+    el.onclick = () => { showPlayerByMutexNetid(`${player.mutex}_${player.netid}`); };
+    el.innerHTML = `<span class="netid">?</span><span class="pname">?</span>`;
+    el.firstElementChild.innerHTML = getPaddedPlayerId(player.netid);
+    el.lastElementChild.textContent = player.displayName;
+    el.dataset['pname'] = player.pureName;
+    el.dataset['netid'] = player.netid;
+    return el;
+}
+
+function updatePlayerIdPaddings() {
+    playerlistElement.querySelectorAll('.player').forEach(rootEl => {
+        const idEl = rootEl.firstElementChild;
+        idEl.innerHTML = getPaddedPlayerId(rootEl.dataset['netid']);
+    });
 }
 
 function addPlayer(player) {
-    if (player.netid > biggestPlayerID) biggestPlayerID = player.netid;
-    let div = `<div class="list-group-item list-group-item-accent-secondary player text-truncate" 
-                onclick="showPlayerByMutexNetid('${currServerMutex}_${player.netid}')" id="divPlayer${player.netid}">
-                    <span class="pping"> ---- </span>
-                    <span class="pname">${xss(player.displayName)}</span>
-            </div>`;
-    $('#playerlist').append(div);
+    const currIdLength = player.netid.toString().length;
+    if (currIdLength > biggestIdLength) {
+        biggestIdLength = currIdLength;
+        updatePlayerIdPaddings();
+    }
+
+    const div = makePlayerDiv(player);
+    playerlistElement.appendChild(div);
 }
 
+//NOTE: not used for now
 function updatePlayer(player) {
     let el = document.getElementById(`divPlayer${player.netid}`);
-    let pingClass = 'secondary'; //hardcoded, no more ping data
-
-    el.classList.remove('list-group-item-accent-secondary', 'list-group-item-accent-success', 'list-group-item-accent-warning', 'list-group-item-accent-danger');
-    el.classList.add('list-group-item-accent-' + pingClass);
-    el.firstElementChild.classList.remove('text-secondary', 'text-success', 'text-warning', 'text-danger');
-    const padSize = biggestPlayerID.toString().length + 2;
-    el.firstElementChild.innerHTML = `[${player.netid}]`.padStart(padSize, 'x').replace(/x/g, '&nbsp;');
-    el.lastElementChild.textContent = player.displayName;
-    el.dataset['pname'] = player.pureName;
+    const newDiv = makePlayerDiv(player);
+    el.innerHTML = newDiv.innerHTML;
 }
 
+function removePlayer(player) {
+    document.getElementById(`divPlayer${player.netid}`).remove();
+}
+function setPlayerlistMessage(message) {
+    Array.from(playerlistElement.children).forEach((el) => el.hidden = true);
+    plistMsgElement.textContent = message;
+    plistMsgElement.hidden = false;
+    plistCountElement.textContent = '--';
+}
 
-function processPlayers(players, mutex) {
-    //If invalid playerlist or error message
-    if (!Array.isArray(players)) {
-        Array.from(playerlistElement.children).forEach((el) => el.hidden = true);
-        if (typeof players == 'string') {
-            plistMsgElement.textContent = players;
-        } else if (players === false) {
-            plistMsgElement.textContent = 'Playerlist not available.';
-        } else {
-            plistMsgElement.textContent = 'Invalid playerlist';
-        }
-        plistMsgElement.hidden = false;
+function processPlayerlistEvents(events) {
+    //Sanity check
+    if (!Array.isArray(events)) {
+        setPlayerlistMessage('Invalid playerlist');
         return;
     }
     plistMsgElement.hidden = true;
     applyPlayerlistFilter();
-    currServerMutex = mutex;
 
-    let newPlayers, removedPlayers, updatedPlayers;
-    try {
-        newPlayers = players.filter((p) => {
-            return !cachedPlayers.filter((x) => x.netid === p.netid).length;
-        });
+    //If there is a fullPlayerlist, skip everything before it
+    const fullListIndex = events.findIndex(e => e.type === 'fullPlayerlist');
+    if (fullListIndex > 0) events = events.slice(fullListIndex);
 
-        removedPlayers = cachedPlayers.filter((p) => {
-            return !players.filter((x) => x.netid === p.netid).length;
-        });
+    //Process events
+    for (const event of events) {
+        if (event.type === 'fullPlayerlist') {
+            playerlistElement.querySelectorAll('.player').forEach(el => el.remove());
+            if (event.playerlist.length) {
+                biggestIdLength = event.playerlist[event.playerlist.length - 1].netid.toString().length;
+                for (const player of event.playerlist) {
+                    player.mutex = event.mutex;
+                    addPlayer(player);
+                }
+            }
 
-        updatedPlayers = cachedPlayers.filter((p) => {
-            return players.filter((x) => x.netid === p.netid).length;
-        });
-    } catch (error) {
-        console.log(`Failed to process the playerlist with message: ${error.message}`);
+        } else if (event.type === 'playerJoining') {
+            addPlayer(event);
+        } else if (event.type === 'playerDropped') {
+            removePlayer(event);
+        } else {
+            console.error('Unknown playerlist event type', event);
+        }
     }
 
-    removedPlayers.forEach(removePlayer);
-    newPlayers.forEach(addPlayer);
-    updatedPlayers.forEach(updatePlayer);
-
-    if (!players.length) {
+    const playerCount = playerlistElement.querySelectorAll('.player').length;
+    if (!playerCount) {
         plistMsgElement.hidden = false;
         plistMsgElement.innerText = `No Players Online.`;
     }
-    cachedPlayers = players;
-    plistCountElement.textContent = players.length;
+    plistCountElement.textContent = playerCount;
 }
 
 
@@ -212,6 +230,7 @@ const modPlayer = {
         tab: document.getElementById('modPlayerIDs-tab'),
         currList: document.getElementById('modPlayerIDs-currList'),
         oldList: document.getElementById('modPlayerIDs-oldList'),
+        hwidsList: document.getElementById('modPlayerIDs-hwidsList'),
     },
     History: {
         body: document.getElementById('modPlayerHistory'),
@@ -286,6 +305,7 @@ function showPlayer(playerRef, keepTabSelection = false) {
 
     modPlayer.IDs.currList.innerText = 'loading...';
     modPlayer.IDs.oldList.innerText = 'loading...';
+    modPlayer.IDs.hwidsList.innerText = 'loading...';
     modPlayer.History.list.innerText = 'loading...';
 
     modPlayer.Ban.tab.classList.add('nav-link-disabled', 'disabled');
@@ -329,7 +349,7 @@ function showPlayer(playerRef, keepTabSelection = false) {
                     { units: ['h', 'm'] }
                 );
                 modPlayer.Main.sessionTimeDiv.classList.remove('d-none');
-            }else{
+            } else {
                 modPlayer.IDs.currList.innerHTML = '<em class="text-secondary">Player offline.</em>';
             }
             if (player.isRegistered) {
@@ -345,15 +365,25 @@ function showPlayer(playerRef, keepTabSelection = false) {
 
                 //Old identifiers
                 if (Array.isArray(player.oldIds)) {
-                    const filteredIds = player.oldIds
+                    const filteredOldIds = player.oldIds
                         .filter(id => !player.isConnected || !player.ids.includes(id)) //don't filter when offline
                         .map(id => `<div class="idsText border-dark text-muted">${xss(id)}</div>`)
                         .join('\n');
-                    modPlayer.IDs.oldList.innerHTML = (filteredIds.length)
-                        ? filteredIds
+                    modPlayer.IDs.oldList.innerHTML = (filteredOldIds.length)
+                        ? filteredOldIds
                         : '<em class="text-secondary">No previous ID to show.</em>';
                 } else {
                     modPlayer.IDs.oldList.innerHTML = '<em class="text-secondary">No previous ID to show.</em>';
+                }
+
+                //All HWIDs
+                if (Array.isArray(player.oldHwids) && player.oldHwids.length) {
+                    const filteredIds = player.oldHwids
+                        .map(xss)
+                        .join('\n');
+                    modPlayer.IDs.hwidsList.innerHTML = `<div class="idsText border-dark text-muted" style="font-size: x-small;">${filteredIds}</div>`;
+                } else {
+                    modPlayer.IDs.hwidsList.innerHTML = '<em class="text-secondary">No HWIDs to show.</em>';
                 }
 
                 //Whitelist

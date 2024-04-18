@@ -1,12 +1,13 @@
+-- Prevent running in monitor mode
+if not TX_SERVER_MODE then return end
+
+
 -- =============================================
 --  Server PlayerList handler
 -- =============================================
---Check Environment
-if GetConvar('txAdminServerMode', 'false') ~= 'true' then
-    return
-end
-function logError(x)
-    print("^5[txAdminClient]^1 " .. x .. "^0")
+
+local function logError(x)
+    txPrint("^1" .. x)
 end
 local oneSyncConvar = GetConvar('onesync', 'off')
 local onesyncEnabled = oneSyncConvar == 'on' or oneSyncConvar == 'legacy'
@@ -14,7 +15,6 @@ local onesyncEnabled = oneSyncConvar == 'on' or oneSyncConvar == 'legacy'
 
 -- Optimizations
 local floor = math.floor
-local max = math.max
 local min = math.min
 local sub = string.sub
 local tonumber = tonumber
@@ -49,7 +49,7 @@ CreateThread(function()
         for yieldCounter, serverID in pairs(players) do
             -- Updating player vehicle/health
             -- NOTE: after testing this seem not to need any error handling
-            local health = 0
+            local health = -1
             local vType = -1
             if onesyncEnabled == true then
                 local ped = GetPlayerPed(serverID)
@@ -59,10 +59,7 @@ CreateThread(function()
                 else
                     vType = vTypeMap["walking"]
                 end
-                -- Its extremely hard to normalize this value to actually reflect
-                -- it as a percentage of the current users max health depending on the server
-                -- Therefore, lets just handle for base case of maxHealth 175 and health range from 100-175
-                health = floor((GetEntityHealth(ped) - 100) / (GetEntityMaxHealth(ped) - 100) * 100)
+                health = GetPedHealthPercent(ped)
             end
 
             -- Updating TX_PLAYERLIST
@@ -113,13 +110,20 @@ end)
 --[[ Handle player Join or Leave ]]
 AddEventHandler('playerJoining', function(srcString, _oldID)
     -- sanity checking source
-    if source <= 0 then 
+    if source <= 0 then
         logError('playerJoining event with source '..json.encode(source))
         return
     end
 
+    -- checking if the player was not already dropped
+    local playerDetectedName = GetPlayerName(source)
+    if type(playerDetectedName) ~= 'string' then
+        logError('Received a playerJoining for a player that was already dropped. There is some resource dropping the player at the playerJoining event handler without first waiting for a tick.')
+        return
+    end
+
     local playerData = {
-        name = sub(GetPlayerName(source) or "unknown", 1, 75),
+        name = sub(playerDetectedName or "unknown", 1, 75),
         ids = GetPlayerIdentifiers(source),
         hwids = GetPlayerTokens(source),
     }
@@ -132,7 +136,7 @@ AddEventHandler('playerJoining', function(srcString, _oldID)
 
     -- relaying this info to all admins
     for adminID, _ in pairs(TX_ADMINS) do
-        TriggerClientEvent('txcl:updatePlayer', adminID, source, playerData.name)
+        TriggerClientEvent('txcl:plist:updatePlayer', adminID, source, playerData.name)
     end
 end)
 
@@ -152,7 +156,7 @@ AddEventHandler('playerDropped', function(reason)
 
     -- relaying this info to all admins
     for adminID, _ in pairs(TX_ADMINS) do
-        TriggerClientEvent('txcl:updatePlayer', adminID, source, false)
+        TriggerClientEvent('txcl:plist:updatePlayer', adminID, source, false)
     end
 end)
 
@@ -173,7 +177,7 @@ end)
 -- for serverID=1, 500 do
 --     fake_playerlist[serverID] = getFakePlayer()
 -- end
-RegisterNetEvent('txsv:getDetailedPlayerlist', function()
+RegisterNetEvent('txsv:req:plist:getDetailed', function()
     if TX_ADMINS[tostring(source)] == nil then
         debugPrint('Ignoring unauthenticated getDetailedPlayerlist() by ' .. source)
         return
@@ -189,7 +193,7 @@ RegisterNetEvent('txsv:getDetailedPlayerlist', function()
         admins[#admins + 1] = tonumber(adminID)
     end
     --DEBUG replace admins with fake_admins
-    TriggerClientEvent('txcl:setDetailedPlayerlist', source, players, admins)
+    TriggerClientEvent('txcl:plist:setDetailed', source, players, admins)
 end)
 
 
@@ -207,5 +211,5 @@ function sendInitialPlayerlist(adminID)
     -- debugPrint("====================================")
 
     debugPrint('Sending initial playerlist to ' .. adminID)
-    TriggerClientEvent('txcl:setInitialPlayerlist', adminID, payload)
+    TriggerClientEvent('txcl:plist:setInitial', adminID, payload)
 end

@@ -1,14 +1,9 @@
---Check Environment
-if GetConvar('txAdminServerMode', 'false') ~= 'true' then
-    return
-end
+-- Prevent running in monitor mode
+if not TX_SERVER_MODE then return end
 
 --Helpers
-function log(x)
-    print("^5[txAdminClient]^0 " .. x)
-end
-function logError(x)
-    print("^5[txAdminClient]^1 " .. x .. "^0")
+local function logError(x)
+    txPrint("^1" .. x)
 end
 function unDeQuote(x)
     local new, count = string.gsub(x, utf8.char(65282), '"')
@@ -21,25 +16,22 @@ if GetCurrentResourceName() ~= "monitor" then
 end
 
 
--- Global Vars
+-- =============================================
+-- Variables stuff
+-- =============================================
 TX_ADMINS = {}
 TX_PLAYERLIST = {}
 TX_LUACOMHOST = GetConvar("txAdmin-luaComHost", "invalid")
 TX_LUACOMTOKEN = GetConvar("txAdmin-luaComToken", "invalid")
 TX_VERSION = GetResourceMetadata(GetCurrentResourceName(), 'version') -- for now, only used in the start print
-TX_DEBUGMODE = (GetConvar('txAdmin-debugMode', 'false') == 'true') -- TODO: start using this global
-TX_HIDE_ANNOUNCEMENT = (GetConvar('txAdmin-hideDefaultAnnouncement', 'false') == 'true')
-TX_HIDE_DIRECTMESSAGE = (GetConvar('txAdmin-hideDefaultDirectMessage', 'false') == 'true')
-TX_HIDE_WARNING = (GetConvar('txAdmin-hideDefaultWarning', 'false') == 'true')
-TX_HIDE_SCHEDULEDRESTARTWARNING = (GetConvar('txAdmin-hideDefaultScheduledRestartWarning', 'false') == 'true')
 
 -- Checking convars
 if TX_LUACOMHOST == "invalid" or TX_LUACOMTOKEN == "invalid" then
-    log('^1API Host or Pipe Token ConVars not found. Do not start this resource if not using txAdmin.')
+    txPrint('^1API Host or Pipe Token ConVars not found. Do not start this resource if not using txAdmin.')
     return
 end
 if TX_LUACOMTOKEN == "removed" then
-    log('^1Please do not restart the monitor resource.')
+    txPrint('^1Please do not restart the monitor resource.')
     return
 end
 
@@ -49,44 +41,21 @@ end
 SetConvar("txAdmin-luaComToken", "removed")
 CreateThread(function()
     Wait(0)
-    if debugModeEnabled then
-        debugPrint("Restoring txAdmin-luaComToken for next monitor restart")
-        SetConvar("txAdmin-luaComToken", TX_LUACOMTOKEN)
-    end
+    if not TX_DEBUG_MODE then return end
+    debugPrint("Restoring txAdmin-luaComToken for next monitor restart")
+    SetConvar("txAdmin-luaComToken", TX_LUACOMTOKEN)
 end)
 
 
--- =============================================
--- Setup threads and commands & main stuff
--- =============================================
+-- vars
 local rejectAllConnections = false
-local hbReturnData = 'no-data'
-log("Version "..TX_VERSION.." starting...")
-CreateThread(function()
-    RegisterCommand("txaPing", txaPing, true)
-    RegisterCommand("txaKickAll", txaKickAll, true)
-    RegisterCommand("txaEvent", txaEvent, true)
-    RegisterCommand("txaReportResources", txaReportResources, true)
-    CreateThread(function()
-        while true do
-            HTTPHeartBeat()
-            Wait(3000)
-        end
-    end)
-    CreateThread(function()
-        while true do
-            FD3HeartBeat()
-            Wait(3000)
-        end
-    end)
-    AddEventHandler('playerConnecting', handleConnections)
-    SetHttpHandler(handleHttp)
-    log("Threads and commands set up. All Ready.")
-end)
+local hbReturnData = '{"error": "no data cached in sv_main.lua"}'
 
 
--- HeartBeat functions
-function HTTPHeartBeat()
+-- =============================================
+-- Heartbeat functions
+-- =============================================
+local function HTTPHeartBeat()
     local url = "http://"..TX_LUACOMHOST.."/intercom/monitor"
     local exData = {
         txAdminToken = TX_LUACOMTOKEN
@@ -102,13 +71,13 @@ function HTTPHeartBeat()
     end, 'POST', json.encode(exData), {['Content-Type']='application/json'})
 end
 
-function FD3HeartBeat()
+local function FD3HeartBeat()
     local payload = json.encode({type = 'txAdminHeartBeat'})
     PrintStructuredTrace(payload)
 end
 
 -- HTTP request handler
-function handleHttp(req, res)
+local function handleHttp(req, res)
     res.writeHead(200, {["Content-Type"]="application/json"})
 
     if req.path == '/stats.json' then
@@ -120,21 +89,25 @@ end
 
 
 -- =============================================
--- stdin commands
+-- Commands
 -- =============================================
-function txaPing(source, args)
-    log("Pong! (txAdmin resource is running)")
+
+--- Simple stdout reply just to make sure the resource is alive
+--- this is only used in debug
+local function txaPing(source, args)
+    txPrint("Pong! (txAdmin resource is running)")
     CancelEvent()
 end
 
--- Kick all players
-function txaKickAll(source, args)
+
+--- Kick all players
+local function txaKickAll(source, args)
     if args[1] == nil then
         args[1] = 'no reason provided'
     else
         args[1] = unDeQuote(args[1])
     end
-    log("Kicking all players with reason: "..args[1])
+    txPrint("Kicking all players with reason: "..args[1])
     for _, pid in pairs(GetPlayers()) do
         DropPlayer(pid, "\n".."Kicked for: " .. args[1])
     end
@@ -142,136 +115,16 @@ function txaKickAll(source, args)
 end
 
 
--- =============================================
---  Events handling
--- =============================================
--- Broadcast admin message to all players
-local function handleAnnouncementEvent(eventData)
-    if not TX_HIDE_ANNOUNCEMENT then
-        TriggerClientEvent("txAdmin:receiveAnnounce", -1, eventData.message, eventData.author)
-    end
-    TriggerEvent('txaLogger:internalChatMessage', 'tx', "(Broadcast) "..eventData.author, eventData.message)
-end
-
--- Broadcast through an announcement that the server will restart in XX minutes
-local function handleScheduledRestartEvent(eventData)
-    if not TX_HIDE_SCHEDULEDRESTARTWARNING then
-        TriggerClientEvent("txAdmin:receiveAnnounce", -1, eventData.translatedMessage, 'txAdmin')
-    end
-    TriggerEvent('txaLogger:internalChatMessage', 'tx', "(Broadcast) txAdmin", eventData.translatedMessage)
-end
-
--- Sends a direct message from an admin to a player
-local function handleDirectMessageEvent(eventData)
-    if not TX_HIDE_DIRECTMESSAGE then
-        TriggerClientEvent("txAdmin:receiveDirectMessage", eventData.target, eventData.message, eventData.author)
-    end
-    TriggerEvent('txaLogger:internalChatMessage', 'tx', "(DM) "..eventData.author, eventData.message)
-end
-
--- Kicks a player
-local function handleKickEvent(eventData)
-    Wait(0) -- give other resources a chance to read player data
-    DropPlayer(eventData.target, '[txAdmin] ' .. eventData.reason)
-end
-
--- Warn specific player via server ID
-local function handleWarnEvent(eventData)
-    local pName = GetPlayerName(eventData.target)
-    if pName ~= nil then
-        if not TX_HIDE_WARNING then
-            TriggerClientEvent("txAdminClient:warn", eventData.target, eventData.author, eventData.reason)
-        end
-        log("Warning "..pName.." with reason: "..eventData.reason)
-    else
-        logError('handleWarnEvent: player not found')
-    end
-end
-
--- Ban player(s) via netid or identifiers
-local function handleBanEvent(eventData)
-    Wait(0) -- give other resources a chance to read player data
-    local kickCount = 0
-    for _, playerID in pairs(GetPlayers()) do
-        local identifiers = GetPlayerIdentifiers(playerID)
-        if identifiers ~= nil then
-            local found = false
-            for _, searchIdentifier in pairs(eventData.targetIds) do
-                if found then break end
-
-                for _, playerIdentifier in pairs(identifiers) do
-                    if searchIdentifier == playerIdentifier then
-                        log("handleBanEvent: Kicking #"..playerID..": "..eventData.reason)
-                        kickCount = kickCount + 1
-                        DropPlayer(playerID, '[txAdmin] ' .. eventData.kickMessage)
-                        found = true
-                        break
-                    end
-                end
-            end
-
-        end
-    end
-
-    if kickCount == 0 then
-        log("handleBanEvent: No players found to kick")
-    end
-end
-
--- Kicks all players and lock joins in preparation for server shutdown
-local function handleShutdownEvent(eventData)
-    print('Server shutdown imminent. Kicking all players.')
-    rejectAllConnections = true
-    local players = GetPlayers()
-    for _, serverID in pairs(players) do
-        DropPlayer(serverID, '[txAdmin] ' .. eventData.message)
-    end
-end
-
--- Handler for all incoming tx cmd events 
-function txaEvent(source, args)
-    -- sanity check
-    if type(args[1]) ~= 'string' or type(args[2]) ~= 'string' then
-        return logError('Invalid arguments for txaEvent')
-    end
-    -- prevent execution from admins or resources
-    if source ~= 0 or GetInvokingResource() ~= nil then return end
-
-    -- processing event
-    local eventName = unDeQuote(args[1])
-    local eventData = json.decode(unDeQuote(args[2]))
-    TriggerEvent("txAdmin:events:" .. eventName, eventData)
-
-    if eventName == 'announcement' then 
-        return handleAnnouncementEvent(eventData)
-    elseif eventName == 'playerDirectMessage' then 
-        return handleDirectMessageEvent(eventData)
-    elseif eventName == 'playerKicked' then 
-        return handleKickEvent(eventData)
-    elseif eventName == 'playerWarned' then 
-        return handleWarnEvent(eventData)
-    elseif eventName == 'playerBanned' then 
-        return handleBanEvent(eventData)
-    elseif eventName == 'serverShuttingDown' then 
-        return handleShutdownEvent(eventData)
-    elseif eventName == 'scheduledRestart' then 
-        return handleScheduledRestartEvent(eventData)
-    end
-    CancelEvent()
-end
-
-
--- =============================================
--- Get all resources/statuses and report back to txAdmin
--- =============================================
-function txaReportResources(source, args)
+--- Get all resources/statuses and report back to txAdmin
+local function txaReportResources(source, args)
     --Prepare resources list
     local resources = {}
     local max = GetNumResources() - 1
     for i = 0, max do
         local resName = GetResourceByFindIndex(i)
 
-        -- hacky patch
+        -- Hacky patch added because a particular resource from this developer had a broken 
+        -- unicode in the resource description, which caused json.encode to fail.
         local resDesc = GetResourceMetadata(resName, 'description')
         if resDesc ~= nil and string.find(resDesc, "Louis.dll") then
             resDesc = nil
@@ -285,7 +138,7 @@ function txaReportResources(source, args)
             description = resDesc,
             path = GetResourcePath(resName)
         }
-        table.insert(resources, currentRes)
+        resources[#resources+1] = currentRes
     end
 
     --Send to txAdmin
@@ -294,7 +147,7 @@ function txaReportResources(source, args)
         txAdminToken = TX_LUACOMTOKEN,
         resources = resources
     }
-    log('Sending resources list to txAdmin.')
+    txPrint('Sending resources list to txAdmin.')
     PerformHttpRequest(url, function(httpCode, data, resultHeaders)
         local resp = tostring(data)
         if httpCode ~= 200 then
@@ -304,10 +157,158 @@ function txaReportResources(source, args)
 end
 
 
+--- Setter for the txAdmin-debugMode convar and TX_DEBUG_MODE global variable
+local function txaSetDebugMode(source, args)
+    -- prevent execution from admins or resources
+    if source ~= 0 or GetInvokingResource() ~= nil then return end
+    -- validating argument
+    if args[1] == nil then return end
+
+    -- changing mode
+    if args[1] == '1' then
+        TX_DEBUG_MODE = true
+        txPrint("^1!! Debug Mode enabled via console !!")
+    elseif args[1] == '0' then
+        TX_DEBUG_MODE = false
+        txPrint("^1!! Debug Mode disabled via console !!")
+    else
+        txPrint("^1!! txaSetDebugMode only accepts '1' or '0' as input. !!")
+    end
+    SetConvarReplicated('txAdmin-debugMode', tostring(TX_DEBUG_MODE))
+    TriggerClientEvent('txcl:setDebugMode', -1, TX_DEBUG_MODE)
+end
+
+
+-- =============================================
+--  Events handling
+-- =============================================
+local cvHideAnnouncement = GetConvarBool('txAdmin-hideDefaultAnnouncement')
+local cvHideDirectMessage = GetConvarBool('txAdmin-hideDefaultDirectMessage')
+local cvHideWarning = GetConvarBool('txAdmin-hideDefaultWarning')
+local cvHideScheduledRestartWarning = GetConvarBool('txAdmin-hideDefaultScheduledRestartWarning')
+local txaEventHandlers = {}
+
+--- Handler for announcement events
+--- Broadcast admin message to all players
+txaEventHandlers.announcement = function(eventData)
+    if not cvHideAnnouncement then
+        TriggerClientEvent('txcl:showAnnouncement', -1, eventData.message, eventData.author)
+    end
+    TriggerEvent('txsv:logger:addChatMessage', 'tx', '(Broadcast) '..eventData.author, eventData.message)
+end
+
+
+--- Handler for scheduled restarts event
+--- Broadcast through an announcement that the server will restart in XX minutes
+txaEventHandlers.scheduledRestart = function(eventData)
+    if not cvHideScheduledRestartWarning then
+        TriggerClientEvent('txcl:showAnnouncement', -1, eventData.translatedMessage, 'txAdmin')
+    end
+    TriggerEvent('txsv:logger:addChatMessage', 'tx', '(Broadcast) txAdmin', eventData.translatedMessage)
+end
+
+
+--- Handler for player DM event
+--- Sends a direct message from an admin to a player
+txaEventHandlers.playerDirectMessage = function(eventData)
+    if not cvHideDirectMessage then
+        TriggerClientEvent('txcl:showDirectMessage', eventData.target, eventData.message, eventData.author)
+    end
+    TriggerEvent('txsv:logger:addChatMessage', 'tx', '(DM) '..eventData.author, eventData.message)
+end
+
+
+--- Handler for player kicked event
+txaEventHandlers.playerKicked = function(eventData)
+    Wait(0) -- give other resources a chance to read player data
+    DropPlayer(eventData.target, '[txAdmin] ' .. eventData.reason)
+end
+
+
+--- Handler for player warned event
+--- Warn specific player via server ID
+txaEventHandlers.playerWarned = function(eventData)
+    local pName = GetPlayerName(eventData.target)
+    if pName ~= nil then
+        if not cvHideWarning then
+            TriggerClientEvent('txcl:showWarning', eventData.target, eventData.author, eventData.reason)
+        end
+        txPrint('Warning '..pName..' with reason: '..eventData.reason)
+    else
+        logError('handleWarnEvent: player not found')
+    end
+end
+
+
+--- Handler for the player banned event
+--- Ban player(s) via netid or identifiers
+txaEventHandlers.playerBanned = function(eventData)
+    Wait(0) -- give other resources a chance to read player data
+    local kickCount = 0
+    for _, playerID in pairs(GetPlayers()) do
+        local identifiers = GetPlayerIdentifiers(playerID)
+        if identifiers ~= nil then
+            local found = false
+            for _, searchIdentifier in pairs(eventData.targetIds) do
+                if found then break end
+
+                for _, playerIdentifier in pairs(identifiers) do
+                    if searchIdentifier == playerIdentifier then
+                        txPrint("handleBanEvent: Kicking #"..playerID..": "..eventData.reason)
+                        kickCount = kickCount + 1
+                        DropPlayer(playerID, '[txAdmin] ' .. eventData.kickMessage)
+                        found = true
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if kickCount == 0 then
+        txPrint("handleBanEvent: No players found to kick")
+    end
+end
+
+
+--- Handler for the imminent shutdown event
+--- Kicks all players and lock joins in preparation for server shutdown
+txaEventHandlers.serverShuttingDown = function(eventData)
+    txPrint('Server shutdown imminent. Kicking all players.')
+    rejectAllConnections = true
+    local players = GetPlayers()
+    for _, serverID in pairs(players) do
+        DropPlayer(serverID, '[txAdmin] ' .. eventData.message)
+    end
+end
+
+
+--- Command that receives all incoming tx events and dispatches 
+--- it to the respective event handler
+local function txaEvent(source, args)
+    -- sanity check
+    if type(args[1]) ~= 'string' or type(args[2]) ~= 'string' then
+        return logError('Invalid arguments for txaEvent')
+    end
+    -- prevent execution from admins or resources
+    if source ~= 0 or GetInvokingResource() ~= nil then return end
+
+    -- processing event
+    local eventName = unDeQuote(args[1])
+    local eventData = json.decode(unDeQuote(args[2]))
+    TriggerEvent('txAdmin:events:' .. eventName, eventData)
+
+    if txaEventHandlers[eventName] ~= nil then
+        return txaEventHandlers[eventName](eventData)
+    end
+    CancelEvent()
+end
+
+
 -- =============================================
 -- Player connecting handler
 -- =============================================
-function handleConnections(name, setKickReason, d)
+local function handleConnections(name, setKickReason, d)
     -- if server is shutting down
     if rejectAllConnections then
         CancelEvent()
@@ -316,7 +317,7 @@ function handleConnections(name, setKickReason, d)
     end
 
     local player = source
-    if GetConvar("txAdmin-checkPlayerJoin", "invalid") == "true" then
+    if GetConvarBool("txAdmin-checkPlayerJoin") then
         d.defer()
         Wait(0)
 
@@ -325,6 +326,7 @@ function handleConnections(name, setKickReason, d)
         local exData = {
             txAdminToken = TX_LUACOMTOKEN,
             playerIds = GetPlayerIdentifiers(player),
+            playerHwids = GetPlayerTokens(player),
             playerName = name
         }
         if #exData.playerIds <= 1 then
@@ -333,47 +335,77 @@ function handleConnections(name, setKickReason, d)
         end
 
         --Attempt to validate the user
-        d.update("\n[txAdmin] Checking banlist/whitelist... (0/10)")
+        d.update("\n[txAdmin] Checking banlist/whitelist... (0/5)")
         CreateThread(function()
             local attempts = 0
             local isDone = false;
-            --Do 10 attempts
-            while isDone == false and attempts < 10 do
+            --Do 5 attempts (2.5 mins)
+            while isDone == false and attempts < 5 do
                 attempts = attempts + 1
-                d.update("\n[txAdmin] Checking banlist/whitelist... ("..attempts.."/10)")
+                d.update("\n[txAdmin] Checking banlist/whitelist... ("..attempts.."/5)")
                 PerformHttpRequest(url, function(httpCode, rawData, resultHeaders)
-                    -- Validating response
-                    local respStr = tostring(rawData)
-                    if httpCode ~= 200 then
-                        logError("\n[txAdmin] Checking banlist/whitelist failed with code "..httpCode.." and message: "..respStr)
-                    end
-                    local respObj = json.decode(respStr)
-                    if not respObj or type(respObj.allow) ~= "boolean" then
-                        logError("\n[txAdmin] Checking banlist/whitelist failed with invalid response: "..respStr)
-                    end
-                    
-                    if respObj.allow == true then
-                        if not isDone then
-                            d.done()
-                            isDone = true
-                        end
-                    else 
-                        if not isDone then
-                            local reason = respObj.reason or "\n[txAdmin] no reason provided"
-                            d.done("\n"..reason)
-                            isDone = true
+                    if isDone then return end
+                    -- rawData = nil
+                    -- httpCode = 408
+
+                    if not rawData or httpCode ~= 200 then
+                        logError("Checking banlist/whitelist failed with code "..httpCode.." and message: "..tostring(rawData))
+                    else
+                        local respStr = tostring(rawData)
+                        local respObj = json.decode(respStr)
+                        if not respObj or type(respObj.allow) ~= "boolean" then
+                            logError("Checking banlist/whitelist failed with invalid response: "..respStr)
+                        else
+                            if respObj.allow == true then
+                                d.done()
+                                isDone = true
+                            else
+                                local reason = respObj.reason or "\n[txAdmin] no reason provided"
+                                d.done("\n"..reason)
+                                isDone = true
+                            end
                         end
                     end
                 end, 'POST', json.encode(exData), {['Content-Type']='application/json'})
-                Wait(2000)
+                Wait(30000) --30s
             end
 
             --Block client if failed
             if not isDone then
-                d.done("\n[txAdmin] Failed to validate your banlist/whitelist status. Try again later.")
+                d.done("\n[txAdmin] Failed to validate your banlist/whitelist status. Try again in a few minutes.")
                 isDone = true
             end
         end)
 
     end
 end
+
+
+-- =============================================
+-- Setup threads and commands & main stuff
+-- =============================================
+
+-- All commands & handlers
+RegisterCommand("txaPing", txaPing, true)
+RegisterCommand("txaKickAll", txaKickAll, true)
+RegisterCommand("txaEvent", txaEvent, true)
+RegisterCommand("txaReportResources", txaReportResources, true)
+RegisterCommand("txaSetDebugMode", txaSetDebugMode, true)
+AddEventHandler('playerConnecting', handleConnections)
+SetHttpHandler(handleHttp)
+
+-- Heartbeat functions are separated in case one hangs
+CreateThread(function()
+    while true do
+        HTTPHeartBeat()
+        Wait(3000)
+    end
+end)
+CreateThread(function()
+    while true do
+        FD3HeartBeat()
+        Wait(3000)
+    end
+end)
+
+txPrint("Resource v"..TX_VERSION.." threads and commands set up. All Ready.")

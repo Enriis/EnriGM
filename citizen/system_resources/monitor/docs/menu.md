@@ -56,13 +56,13 @@ Convars configured in the settings page should not be set manually.
 - Default: `false`
 
 ### Convar only (not in settings page)
-**txAdmin-menuDebug**
+**txAdmin-debugMode**
 - Description: Will toggle debug printing on the server and client.
 - Default: `false`
-- Usage: `+setr txAdmin-menuDebug true`
+- Usage: `+setr txAdmin-debugMode true`
 
 **txAdmin-menuPlayerIdDistance**
-- Description: The distance in which Player IDs become visible, if toggled on.
+- Description: The distance in which Player IDs become visible, if toggled on. Note that the game engine limits to show tags that are only closer than ~300m, so increasing the number above that might be useless. 
 - Default: 150
 - Usage: `+setr txAdmin-menuPlayerIdDistance 100`
 
@@ -88,11 +88,6 @@ positions, `top-center`, `top-left`, `top-right`, `bottom-center`, `bottom-left`
 - Description: Will toggle the in-game menu. This command has an optional argument of a player id that will quickly open up the target player's info modal.
 - Usage: `/tx (playerID)`, `/txadmin (playerID)`
 - Required Perm: `Must be an admin registered in the Admin Manager`
-
-**txAdmin-debug**
-- Description: Will toggle on debug mode without requiring a restart. (Can be used from console)
-- Usage: `/txAdmin-debug [0 | 1]`
-- Required Perm: `control.server`
 
 **txAdmin-reauth**
 - Description: Will retrigger the reauthentication process.

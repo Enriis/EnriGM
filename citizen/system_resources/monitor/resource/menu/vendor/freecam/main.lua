@@ -61,7 +61,7 @@ local function UpdateCamera()
     -- Update camera
     SetFreecamPosition(pos.x, pos.y, pos.z)
     SetFreecamRotation(rot.x, rot.y, rot.z)
-  
+
     return pos, rotZ
   end
 
@@ -71,22 +71,41 @@ local function UpdateCamera()
 end
 
 -------------------------------------------------------------------------------
+local keysTable = {
+  {'Slower', CONTROLS.MOVE_SLOW},
+  {'Faster', CONTROLS.MOVE_FAST},
+  {'Down', CONTROLS.MOVE_Z[2]},
+  {'Up', CONTROLS.MOVE_Z[1]},
+  {'Left/Right', CONTROLS.MOVE_X},
+  {'Fwd/Back', CONTROLS.MOVE_Y},
+}
+local redmInstructionGroup, redmPromptTitle
+if IS_REDM then
+  redmPromptTitle = CreateVarString(10, 'LITERAL_STRING', 'NoClip')
+  redmInstructionGroup = makeRedmInstructionalGroup(keysTable)
+end
+
+
 function StartFreecamThread()
   -- Camera/Pos updating thread
-  Citizen.CreateThread(function ()
+  Citizen.CreateThread(function()
     local ped = PlayerPedId()
     local initialPos = GetEntityCoords(ped)
     SetFreecamPosition(initialPos[1], initialPos[2], initialPos[3])
+    local veh = GetVehiclePedIsIn(ped, false)
+    if IsPedOnMount(ped) then
+      veh = GetMount(ped)
+    end
 
     local function updatePos(pos, rotZ)
       if pos ~= nil and rotZ ~= nil then
         -- Update ped
-        SetEntityCoords(ped, pos.x, pos.y, pos.z)
+        SetEntityCoords(ped, pos.x, pos.y, pos.z, false, false, false, false)
         SetEntityHeading(ped, rotZ)
         -- Update veh
-        local veh = GetVehiclePedIsIn(ped, false)
-        if veh and veh > 0 then 
-          SetEntityCoords(veh, pos.x, pos.y, pos.z)
+        if veh and veh > 0 and DoesEntityExist(veh) then
+          SetEntityCoords(veh, pos.x, pos.y, pos.z, false, false, false, false)
+          SetEntityHeading(veh, rotZ)
         end
       end
     end
@@ -106,72 +125,23 @@ function StartFreecamThread()
     -- One last time due to the optimization
     updatePos(loopPos, loopRotZ)
   end)
-  
-  local function InstructionalButton(controlButton, text)
-    ScaleformMovieMethodAddParamPlayerNameString(controlButton)
-    BeginTextCommandScaleformString("STRING")
-    AddTextComponentScaleform(text)
-    EndTextCommandScaleformString()
-  end
-  
-  --Scaleform drawing thread
-  Citizen.CreateThread(function()
-    local scaleform = RequestScaleformMovie("instructional_buttons")
-    while not HasScaleformMovieLoaded(scaleform) do
-      Wait(1)
-    end
-    PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
-    PopScaleformMovieFunctionVoid()
-    
-    PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
-    PushScaleformMovieFunctionParameterInt(200)
-    PopScaleformMovieFunctionVoid()
-  
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(0)
-    InstructionalButton(GetControlInstructionalButton(0, CONTROLS.MOVE_FAST, 1), "Faster")
-    PopScaleformMovieFunctionVoid()
-      
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(1)
-    InstructionalButton(GetControlInstructionalButton(0, CONTROLS.MOVE_SLOW, 1), "Slower")
-    PopScaleformMovieFunctionVoid()
-      
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(2)
-    InstructionalButton(GetControlInstructionalButton(0, CONTROLS.MOVE_Y, 1), "Fwd/Back")
-    PopScaleformMovieFunctionVoid()
-      
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(3)
-    InstructionalButton(GetControlInstructionalButton(0, CONTROLS.MOVE_X, 1), "Left/Right")
-    PopScaleformMovieFunctionVoid()
-  
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(4)
-    InstructionalButton(GetControlInstructionalButton(0, CONTROLS.MOVE_Z[2], 1), "Down")
-    PopScaleformMovieFunctionVoid()
-  
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-    PushScaleformMovieFunctionParameterInt(5)
-    InstructionalButton(GetControlInstructionalButton(0, CONTROLS.MOVE_Z[1], 1), "Up")
-    PopScaleformMovieFunctionVoid()
-  
-    PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
-    PopScaleformMovieFunctionVoid()
-  
-    PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(80)
-    PopScaleformMovieFunctionVoid()
-  
+
+  -- Start instructional thread
+  CreateThread(function()
+    local fivemScaleform = IS_FIVEM and makeFivemInstructionalScaleform(keysTable)
     while IsFreecamActive() do
-      DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0)
+      if IS_FIVEM then
+        DrawScaleformMovieFullscreen(fivemScaleform, 255, 255, 255, 255, 0)
+      else
+        PromptSetActiveGroupThisFrame(redmInstructionGroup.groupId, redmPromptTitle, 1, 0, 0, 0)
+      end
       Wait(0)
     end
-    SetScaleformMovieAsNoLongerNeeded()
+
+    --cleanup of the scaleform movie
+    if IS_FIVEM then
+      SetScaleformMovieAsNoLongerNeeded()
+    end
   end)
 end
 
@@ -179,7 +149,7 @@ end
 
 -- When the resource is stopped, make sure to return the camera to the player.
 AddEventHandler('onResourceStop', function (resourceName)
-  if resourceName == GetCurrentResourceName() then
+  if resourceName == "monitor" then
     SetFreecamActive(false)
   end
 end)

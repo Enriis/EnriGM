@@ -116,26 +116,12 @@
 
 
 <script src="js/ansi_up.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
 <script>
     //============================================== Live Console stuff
     (function () {
         //Preparing variables
         const BUFFER_TRIM_SIZE = 128 * 1024; // 128kb
         const commandHistoryLimit = 12;
-        const defaultSocketOpts = {
-            transports: ['polling'],
-            upgrade: false,
-            query: {
-                room: 'liveconsole'
-            }
-        }
-        let socket;
-        if (isWebInterface) {
-            socket = io({...defaultSocketOpts, path: '/socket.io'});
-        }else{
-            socket = io('monitor', {...defaultSocketOpts, path: '/WebPipe/socket.io'});
-        }
         
         const ansi_up = new AnsiUp;
         ansi_up.escape_for_html = false;
@@ -155,15 +141,20 @@
         //Helper Functions
         const stringToDOMId = (str) => `${str.replace(/\s?\s+/g, '-').slice(0, 32)}${str.length > 32 ? '_trim' : ''}`.trim();
 
+        const setInputValue = (newValue) => {
+            input.value = newValue;
+            input.focus();
+        }
+
         const addCommandHistoryEntry = (command) => {
             const btnText = `${command.slice(0, 15)}${command.length > 15 ? '...' : ''}`;
             const node = document.createElement('button');
             node.appendChild(document.createTextNode(btnText));
             node.setAttribute('id', stringToDOMId(command));
             node.setAttribute('class', 'btn btn-outline-light btn-sm m-1');
+            node.setAttribute('title', command);
             node.onclick = (e) => {
-                input.value = command;
-                input.focus();
+                setInputValue(command);
             };
             historyElement.appendChild(node);
         }
@@ -194,20 +185,18 @@
         }
 
         
-        //Events
-        socket.on('error', (error) => {
-            console.dir(error)
+        //Socket stuff
+        const pageSocket = getSocket('liveconsole');
+        pageSocket.on('error', (error) => {
+            console.log('Page Socket.IO', error);
         });
-        socket.on('connect', () => {
-            console.log("Socket.IO Connected.");
+        pageSocket.on('connect', () => {
+            console.log("Page Socket.IO Connected.");
         });
-        socket.on('disconnect', () => {
-            console.log("Socket.IO Disonnected.");
+        pageSocket.on('disconnect', (message) => {
+            console.log("Page Socket.IO Disonnected:", message);
         });
-        socket.on('goDashboard', (error) => {
-            window.location = '/';
-        });
-        socket.on('consoleData', function (msg) {
+        pageSocket.on('consoleData', function (msg) {
             const cleanMsg = xss(msg)
                 .replace(/<br>/g, '\n')
                 .replace(/{txMarker-(\w+)}/g, '<mark class="consoleMark-$1">')
@@ -240,12 +229,12 @@
         consoleForm.addEventListener("submit", function (e) {
             e.preventDefault();
             const command = input.value.trim();
-            input.value = '';
+            setInputValue('');
             if(!command.length) return;
             arrowHistIndex = -1;
 
             commandCache.unshift(command);
-            socket.emit('consoleCommand', command);
+            pageSocket.emit('consoleCommand', command);
 
             autoscrollToggle(true);
 
@@ -269,6 +258,7 @@
             let changed = false;
 
             if (event.key === "ArrowUp") {
+                event.preventDefault();
                 changed = true;
                 if (typeof arrowHistIndex === 'undefined' && commandCache.length > 0) {
                     arrowHistIndex = 0;
@@ -277,6 +267,7 @@
                 }
 
             } else if (event.key === "ArrowDown") {
+                event.preventDefault();
                 changed = true;
                 if (arrowHistIndex > 0) {
                     arrowHistIndex -= 1;
@@ -285,7 +276,7 @@
                 }
             }
 
-            if (changed) input.value = commandCache[arrowHistIndex] || "";
+            if (changed) setInputValue(commandCache[arrowHistIndex] || '');
         });
 
         //Buttons

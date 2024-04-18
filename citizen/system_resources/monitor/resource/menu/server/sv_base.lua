@@ -1,15 +1,13 @@
---Check Environment
-if GetConvar('txAdminServerMode', 'false') ~= 'true' then
-  return
-end
+-- Prevent running in monitor mode
+if not TX_SERVER_MODE then return end
+-- Prevent running if menu is disabled
+if not TX_MENU_ENABLED then return end
 
-
-ServerCtxObj = {
+local ServerCtxObj = {
   oneSync = {
     type = nil,
     status = false
   },
-
   projectName = nil,
   maxClients = 30,
   locale = nil,
@@ -19,32 +17,6 @@ ServerCtxObj = {
   alignRight = false,
   announceNotiPos = '', -- top-center, top-right, top-left, bottom-center, bottom-right, bottom-left
 }
-
-
-RegisterCommand('txAdmin-debug', function(src, args)
-  if src > 0 then
-    if not PlayerHasTxPermission(src, 'control.server') then
-      return
-    end
-  end
-
-  local playerName = (src > 0) and GetPlayerName(src) or 'Console'
-
-  if not args[1] then
-    return
-  end
-
-  if args[1] == '1' then
-    debugModeEnabled = true
-    debugPrint("^1!! Debug mode enabled by ^2" .. playerName .. "^1 !!^0")
-    TriggerClientEvent('txAdmin:events:setDebugMode', -1, true)
-  elseif args[1] == '0' then
-    debugPrint("^1!! Debug mode disabled by ^2" .. playerName .. "^1 !!^0")
-    debugModeEnabled = false
-    TriggerClientEvent('txAdmin:events:setDebugMode', -1, false)
-  end
-end)
-
 
 local function getCustomLocaleData()
   --Get convar
@@ -56,7 +28,7 @@ local function getCustomLocaleData()
   -- Get file data
   local fileHandle = io.open(filePath, "rb")
   if not fileHandle then
-    print('^1WARNING: failed to load custom locale from path: '..filePath)
+    txPrint('^1WARNING: failed to load custom locale from path: '..filePath)
     return false
   end
   local fileData = fileHandle:read "*a"
@@ -70,7 +42,7 @@ local function getCustomLocaleData()
     or type(locale['nui_warning']) ~= "table"
     or type(locale['nui_menu']) ~= "table"
   then
-    print('^1WARNING: load or validate custom locale JSON data from path: '..filePath)
+    txPrint('^1WARNING: load or validate custom locale JSON data from path: '..filePath)
     return false
   end
 
@@ -98,7 +70,7 @@ local function syncServerCtx()
   local switchPageKey = GetConvar('txAdmin-menuPageKey', 'Tab')
   ServerCtxObj.switchPageKey = switchPageKey
 
-  local alignRight = (GetConvar('txAdmin-menuAlignRight', 'false') == 'true')
+  local alignRight = GetConvarBool('txAdmin-menuAlignRight')
   ServerCtxObj.alignRight = alignRight
 
   local txAdminVersion = GetConvar('txAdmin-version', '0.0.0')
@@ -138,13 +110,13 @@ local function syncServerCtx()
 
   -- Telling admins that the server context changed
   for adminID, _ in pairs(TX_ADMINS) do
-    TriggerClientEvent('txAdmin:events:setServerCtx', adminID, ServerCtxObj)
+    TriggerClientEvent('txcl:setServerCtx', adminID, ServerCtxObj)
   end
 end
 
-RegisterNetEvent('txAdmin:events:getServerCtx', function()
+RegisterNetEvent('txsv:req:serverCtx', function()
   local src = source
-  TriggerClientEvent('txAdmin:events:setServerCtx', src, ServerCtxObj)
+  TriggerClientEvent('txcl:setServerCtx', src, ServerCtxObj)
 end)
 
 -- Everytime the txAdmin convars are changed this event will fire
@@ -156,7 +128,7 @@ end)
 
 
 CreateThread(function()
-  -- If we don't wait for a tick there is some race condition that
+  -- If we don't wait for two ticks there is some race condition that
   -- sometimes prevents debugPrint lmao
   Wait(0)
   syncServerCtx()

@@ -36,6 +36,29 @@
             </summary>
             <remarks>Only works on <see cref="T:CitizenFX.Core.BaseScript"/> inherited class methods</remarks>
         </member>
+        <member name="P:CitizenFX.Core.CommandAttribute.RemapParameters">
+            <returns></returns>
+            <inheritdoc cref="M:CitizenFX.Core.Func.ConstructCommandRemapped(System.Object,System.Reflection.MethodInfo)"/>
+        </member>
+        <member name="T:CitizenFX.Core.KeyMapAttribute">
+            <summary>Does nothing on server side</summary>
+        </member>
+        <member name="P:CitizenFX.Core.KeyMapAttribute.RemapParameters">
+            <returns></returns>
+            <inheritdoc cref="M:CitizenFX.Core.Func.ConstructCommandRemapped(System.Object,System.Reflection.MethodInfo)"/>
+        </member>
+        <member name="M:CitizenFX.Core.KeyMapAttribute.#ctor(System.String,System.String,System.String,System.String)">
+            <inheritdoc cref="T:CitizenFX.Core.KeyMapAttribute"/>
+            <param name="command">The command to execute, and the identifier of the binding</param>
+            <param name="description">A description for in the settings menu</param>
+            <param name="inputMapper">The mapper ID to use for the default binding, e.g. keyboard</param>
+            <param name="inputParameter">The IO parameter ID to use for the default binding, e.g. f3</param>
+        </member>
+        <member name="M:CitizenFX.Core.KeyMapAttribute.#ctor(System.String)">
+            <inheritdoc cref="T:CitizenFX.Core.KeyMapAttribute"/>
+            <remarks>Does not register the key mapping, so it works the same as <see cref="P:CitizenFX.Core.KeyMapAttribute.Command"/></remarks>
+            <param name="commandOnly">The command to execute, and the identifier of the binding</param>
+        </member>
         <member name="T:CitizenFX.Core.EventHandlerAttribute">
             <summary>
             Register this method to listen for the given <see cref="P:CitizenFX.Core.EventHandlerAttribute.Event"/> when this <see cref="T:CitizenFX.Core.BaseScript"/> is loaded
@@ -48,10 +71,65 @@
             </summary>
             <remarks>Only works on <see cref="T:CitizenFX.Core.BaseScript"/> inherited class methods</remarks>
         </member>
+        <member name="T:CitizenFX.Core.SourceAttribute">
+            <summary>
+            When used in events it'll be filled with the caller (source) of this event
+            </summary>
+            <example>
+            	Shared libraries
+            	<code>[Source] Remote remote</code>
+            </example>
+            <example>
+            	Server libraries
+            	<code>[Source] Player player</code>
+            </example>
+            <example>
+            	Shared libraries
+            	<code>[Source] bool isRemote</code>
+            </example>
+        </member>
+        <member name="T:CitizenFX.Core.EnableOnLoadAttribute">
+            <summary>
+            Explicitly enable or disable <see cref="T:CitizenFX.Core.BaseScript" /> instantiation when this resource is starting.
+            </summary>
+        </member>
         <member name="E:CitizenFX.Core.BaseScript.Tick">
             <summary>
-            An event containing callbacks to attempt to schedule on every game tick.
-            A callback will only be rescheduled once the associated task completes.
+            A method to be scheduled on every game tick, do note that they'll only be rescheduled for the next frame once the method returns.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.BaseScript.Enable">
+            <summary>
+            Enables all ticks, commands, events, and exports
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.BaseScript.Disable">
+            <summary>
+            Disables all tick repeats, commands, events, and exports
+            </summary>
+            <remarks>
+            1. This <see cref="T:CitizenFX.Core.BaseScript"/> can't re-enable itself except for callbacks, you may want to hold a reference to it.<br />
+            2. External code/scripts can still call in for commands, but they'll get <see langword="null"/> returned automatically.
+            </remarks>
+        </member>
+        <member name="M:CitizenFX.Core.BaseScript.Disable(System.Boolean)">
+            <summary>
+            Disables all tick repeats, commands, events, and exports
+            </summary>
+            <remarks>
+            1. This <see cref="T:CitizenFX.Core.BaseScript"/> can't re-enable itself, unless <paramref name="deleteAllCallbacks"/> is <see langword="false" /> then callbacks are still able to, you may want to hold a reference to it.<br />
+            2. External code/scripts can still call in for commands, but they'll get <see langword="null"/> returned automatically.
+            </remarks>
+            <param name="deleteAllCallbacks">If enabled will delete all callbacks targeting this <see cref="T:CitizenFX.Core.BaseScript"/> instance</param>
+        </member>
+        <member name="M:CitizenFX.Core.BaseScript.OnEnable">
+            <summary>
+            Called when this script got enabled
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.BaseScript.OnDisable">
+            <summary>
+            Called when this script got disabled
             </summary>
         </member>
         <member name="M:CitizenFX.Core.BaseScript.Delay(System.UInt32)">
@@ -64,13 +142,290 @@
             <param name="msecs">The amount of time by which to delay scheduling this interval function.</param>
             <returns>An awaitable task.</returns>
         </member>
-        <member name="M:CitizenFX.Core.Debug.ShouldWeLogDynFuncError(System.Exception,CitizenFX.Core.DynFunc)">
+        <member name="M:CitizenFX.Core.BaseScript.RegisterScript(CitizenFX.Core.BaseScript)">
             <summary>
-            Simple logic to determine if the InvalidCastException came from the DynFunc and if so if we should print it or ignore it
+            Activates all ticks, events, and exports.
             </summary>
-            <param name="exc">the thrown exception in question</param>
-            <param name="func">the DynFunc that was being executed</param>
-            <returns>true if we should still print/log it</returns>
+            <param name="script">script to activate</param>
+        </member>
+        <member name="M:CitizenFX.Core.BaseScript.UnregisterScript(CitizenFX.Core.BaseScript)">
+            <summary>
+            Deactivates all ticks, events, and exports.
+            </summary>
+            <param name="script">script to deactivate</param>
+        </member>
+        <member name="T:CitizenFX.Core.ClientScript">
+            <inheritdoc cref="T:CitizenFX.Core.BaseScript"/>
+            <remarks>Will and can only be activated in client environments</remarks>
+        </member>
+        <member name="T:CitizenFX.Core.ServerScript">
+            <inheritdoc cref="T:CitizenFX.Core.BaseScript"/>
+            <remarks>Will and can only be activated in server environments</remarks>
+        </member>
+        <member name="M:CitizenFX.Core.CancelerToken.CancelOrThrowIfRequested">
+            <summary>
+            Combination of <see cref="P:CitizenFX.Core.CancelerToken.IsCanceled"/> and <see cref="P:CitizenFX.Core.CancelerToken.ThrowOnCancelation"/> for throwing support
+            </summary>
+            <returns><see langword="true"/> if we need to stop execution of the coroutine otherwise <see langword="false"/></returns>
+            <exception cref="T:CitizenFX.Core.CoroutineCanceledException"></exception>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.ContinueWith(System.Action{CitizenFX.Core.Coroutine})">
+            <summary>
+            Adds an action that will be called when this coroutine is done
+            </summary>
+            <param name="action">Action to call when coroutine completes</param>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.ContinueWith(System.Action)">
+            <summary>
+            Adds an action that will be called when this coroutine is done
+            </summary>
+            <param name="action">Action to call when coroutine completes</param>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.ClearContinueWith">
+            <summary>
+            Removes all continued actions, e.g.: <see cref="M:CitizenFX.Core.Coroutine.ContinueWith(System.Action{CitizenFX.Core.Coroutine})"/> and sets one that writes any exception thrown instead
+            </summary>
+            <remarks>Unsafe. Should only be used when you know the exact state of this coroutine</remarks>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Yield">
+            <summary>
+            Await to stall execution and continue next frame.
+            </summary>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.WaitUntil(CitizenFX.Core.TimePoint)">
+            <summary>
+            Await to stall execution of the current async method and continue after the given time.
+            </summary>
+            <param name="time">Time in milliseconds after we want to continue execution</param>
+            <remarks>Current time can be retrieved by using <see cref="P:CitizenFX.Core.Scheduler.CurrentTime"/></remarks>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.WaitUntil(CitizenFX.Core.TimePoint,CitizenFX.Core.CancelerToken)">
+            <summary>
+            Await to stall execution of the current async method and continue after the given time.
+            </summary>
+            <param name="time">Time in milliseconds after we want to continue execution</param>
+            <param name="cancelerToken">Canceling token, can be used to stop early</param>
+            <remarks>Current time can be retrieved by using <see cref="P:CitizenFX.Core.Scheduler.CurrentTime"/></remarks>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Wait(System.UInt64)">
+            <summary>
+            Await to stall execution of the current async method and continue after the given delay.
+            </summary>
+            <param name="delay">Delay in milliseconds after we want to continue execution</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Wait(System.UInt64,CitizenFX.Core.CancelerToken)">
+            <summary>
+            Await to stall execution of the current async method and continue after the given delay.
+            </summary>
+            <param name="delay">Delay in milliseconds after we want to continue execution</param>
+            <param name="cancelerToken">Canceling token, can be used to stop early</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Delay(System.UInt64)">
+            <summary>
+            Await to stall execution of the current async method and continue after the given delay.
+            </summary>
+            <param name="delay">Delay in milliseconds after we want to continue execution</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Delay(System.UInt64,CitizenFX.Core.CancelerToken)">
+            <summary>
+            Await to stall execution of the current async method and continue after the given delay.
+            </summary>
+            <param name="delay">Delay in milliseconds after we want to continue execution</param>
+            <param name="cancelerToken">Canceling token, can be used to stop early</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)">
+            <summary>
+            Schedules a delegate to be run at a later time
+            </summary>
+            <param name="function">Delegate to run</param>
+            <param name="delay">Delay until the <paramref name="function"/> is executed</param>
+            <param name="iterations">Amount of times we want to run the <paramref name="function"/>. <see cref="F:CitizenFX.Core.Repeat.Infinite"/> or <see cref="F:System.UInt64.MaxValue"/> to infinitely loop.</param>
+            <param name="cancelerToken">Allows the cancellation of the given <paramref name="function"/> before it got executed</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule``1(System.Func{CitizenFX.Core.Coroutine{``0}},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},CitizenFX.Core.TimePoint,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule``1(System.Func{CitizenFX.Core.Coroutine{``0}},CitizenFX.Core.TimePoint,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine})">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule``1(System.Func{CitizenFX.Core.Coroutine{``0}},System.UInt64,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Action)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Action,System.UInt64,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Schedule(System.Action,System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Schedule(System.Func{CitizenFX.Core.Coroutine},System.UInt64,System.UInt64,CitizenFX.Core.CancelerToken)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Run(System.Action)">
+            <summary>
+            Runs given function on the main thread; will be scheduled if we're not on the main thread, otherwise it'll be run directly.
+            </summary>
+            <param name="function">Function to run</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Run(System.Func{CitizenFX.Core.Coroutine})">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Run(System.Action)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.Run``1(System.Func{CitizenFX.Core.Coroutine{``0}})">
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine`1"/></returns>
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.Run(System.Action)"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.RunNextFrame(System.Func{CitizenFX.Core.Coroutine})">
+            <summary>
+            Runs given function next frame and allows the caller to await it.
+            </summary>
+            <param name="function">Function to run</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.RunNextFrame(System.Action)">
+            <inheritdoc cref="M:CitizenFX.Core.Coroutine.RunNextFrame(System.Func{CitizenFX.Core.Coroutine})"/>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.RunNextFrame``1(System.Func{CitizenFX.Core.Coroutine{``0}})">
+            <summary>
+            Runs given function directly and allows the caller to await it.
+            </summary>
+            <param name="function">Function to run</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine`1"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.WhenAny(CitizenFX.Core.Coroutine[])">
+            <summary>
+            Run all functions and await the first one to complete
+            </summary>
+            <remarks>Will run the coroutines directly</remarks>
+            <param name="coroutines">Coroutines to await</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.WhenAny``1(CitizenFX.Core.Coroutine{``0}[])">
+            <summary>
+            Run all functions and await the first one to complete
+            </summary>
+            <remarks>Will run the coroutines directly</remarks>
+            <param name="coroutines">Coroutines to await</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.WhenAll(CitizenFX.Core.Coroutine[])">
+            <summary>
+            Run all functions and await all to complete
+            </summary>
+            <param name="coroutines">Coroutines to await</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.Coroutine.WhenAll``1(CitizenFX.Core.Coroutine{``0}[])">
+            <summary>
+            Run all functions and await all to complete
+            </summary>
+            <param name="coroutines">Coroutines to await</param>
+            <returns>Awaitable <see cref="T:CitizenFX.Core.Coroutine"/></returns>
+        </member>
+        <member name="P:CitizenFX.Core.Scheduler.CurrentTime">
+            <summary>
+            Current time of this scheduler
+            </summary>
+        </member>
+        <member name="P:CitizenFX.Core.Scheduler.MainThread">
+            <summary>
+            Thread onto which all coroutines will run and be put back to
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Scheduler.s_queue">
+            <summary>
+            Current time of the scheduler, set per frame.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Scheduler.s_nextFrame">
+            <summary>
+            Double buffered array for non-ordered scheduling
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Scheduler.Schedule(System.Action)">
+            <summary>
+            Schedule an action to be run on the next frame
+            </summary>
+            <param name="coroutine">Action to execute</param>
+        </member>
+        <member name="M:CitizenFX.Core.Scheduler.Schedule(System.Action,System.UInt64)">
+            <summary>
+            Schedule an action to be run at the first frame at or after the specified time
+            </summary>
+            <param name="coroutine">Action to execute</param>
+            <param name="delay">Time when it should be executed, see <see cref="P:CitizenFX.Core.Scheduler.CurrentTime"/></param>
+        </member>
+        <member name="M:CitizenFX.Core.Scheduler.Schedule(System.Action,CitizenFX.Core.TimePoint)">
+            <summary>
+            Schedule an action to be run at the first frame at or after the specified time
+            </summary>
+            <param name="coroutine">Action to execute</param>
+            <param name="time">Time when it should be executed, see <see cref="P:CitizenFX.Core.Scheduler.CurrentTime"/></param>
+        </member>
+        <member name="M:CitizenFX.Core.Scheduler.Unschedule(System.Action,CitizenFX.Core.TimePoint)">
+            <summary>
+            Removes scheduled coroutine from the scheduler (except for the next frame list)
+            </summary>
+            <param name="coroutine">Coroutine to remove</param>
+            <param name="time">Max scheduled time we consider searching to</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:CitizenFX.Core.Scheduler.Update">
+            <summary>
+            Execute all scheduled coroutines
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Scheduler.NextTaskTime">
+            <summary>
+            Time in milliseconds when the next action needs to be activated
+            </summary>
+            <returns>Delay in milliseconds or ~0ul (<see cref="F:System.UInt64.MaxValue"/>) if there's nothing to run</returns>
+        </member>
+        <member name="T:CitizenFX.Core.TimePoint">
+            <summary>
+            Absolute time for scheduling on fixed points in time
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.DynFuncExceptions.None">
+            <summary>
+            Ignore any exception thrown
+            /// </summary>
+        </member>
+        <member name="F:CitizenFX.Core.DynFuncExceptions.InvalidCastException">
+            <summary>
+            If you like to keep the option to ignore calls with incorrect arguments but d
+            </summary>
+            <example>
+            // Disable InvalidCastException logs but still make use of them being ignored
+            Debug.LogExceptionsOnDynFunc &amp;= ~DynFuncExceptions.InvalidCastException;
+            </example>
+        </member>
+        <member name="F:CitizenFX.Core.DynFuncExceptions.ReportTypeMatching">
+            <summary>
+            Will output parameters vs argument conversion/castability report, helpful for development
+            </summary>
+            <remarks>Can have a performance if it's hit often.</remarks>
+        </member>
+        <member name="F:CitizenFX.Core.DynFuncExceptions.Everything">
+            <summary>
+            Panic mode, give all details
+            </summary>
         </member>
         <member name="M:CitizenFX.Core.Func.Create(System.Type,System.String)">
             <summary>
@@ -109,12 +464,186 @@
             <returns>dynamically invokable delegate or returns <paramref name="deleg"/> if it's aleady of type <see cref="T:CitizenFX.Core.DynFunc"/></returns>
             <exception cref="T:System.ArgumentNullException">when the given method is non-static and target is null or if given method is null</exception>
         </member>
+        <member name="M:CitizenFX.Core.Func.ConstructCommandRemapped(System.Object,System.Reflection.MethodInfo)">
+            <summary>
+            If enabled creates a <see cref="T:CitizenFX.Core.DynFunc"/> that remaps input (<see cref="T:System.UInt16"/> source, <see cref="T:System.Object"/>[] arguments, <see cref="T:System.String"/> raw) to known types:<br />
+            <b>source</b>: <see cref="T:System.UInt16"/>, <see cref="T:System.UInt32"/>, <see cref="T:System.Int32"/>, <see cref="T:System.Boolean"/>, <see cref="T:CitizenFX.Core.Remote"/>, or any type constructable from <see cref="T:CitizenFX.Core.Remote"/> including Player types.<br />
+            <b>arguments</b>: <see cref="T:System.Object"/>[] or <see cref="T:System.String"/>[].<br />
+            <b>raw</b>: <see cref="T:System.String"/>
+            </summary>
+            <param name="target">Method's associated instance</param>
+            <param name="method">Method to wrap</param>
+            <returns>Dynamic invocable <see cref="T:CitizenFX.Core.DynFunc"/> with remapping and conversion support.</returns>
+            <exception cref="T:System.ArgumentException">When <see cref="T:CitizenFX.Core.SourceAttribute"/> is used on a non supported type.</exception>
+            <exception cref="T:System.Reflection.TargetParameterCountException">When any requested parameter isn't supported.</exception>
+        </member>
+        <member name="M:CitizenFX.Core.Func.GetWrappedMethod(CitizenFX.Core.DynFunc)">
+            <summary>
+            Returns the original method that's been wrapped or its own <see cref="P:System.Delegate.Method"/>
+            </summary>
+            <param name="dynFunc">this reference</param>
+            <returns>The wrapped method or <see cref="P:System.Delegate.Method"/> if it wasn't wrapped</returns>
+        </member>
+        <member name="M:CitizenFX.Core.Events.RegisterEventHandler(System.String,CitizenFX.Core.DynFunc,CitizenFX.Core.Binding)">
+            <summary>
+            Register an event handler
+            </summary>
+            <remarks>Be aware this will keep <paramref name="handler"/>.Target object alive once registered, unless it's of type <see cref="T:CitizenFX.Core.BaseScript"/></remarks>
+            <param name="eventName">name to listen for</param>
+            <param name="handler">delegate to call once triggered</param>
+            <param name="binding">limit calls to certain sources, e.g.: server only, client only</param>
+        </member>
+        <member name="M:CitizenFX.Core.Events.UnregisterEventHandler(System.String,CitizenFX.Core.DynFunc)">
+            <summary>
+            Unregister an event handler
+            </summary>
+            <param name="eventName">name to remove event for</param>
+            <param name="handler">delegate to remove</param>
+        </member>
+        <member name="M:CitizenFX.Core.Events.TriggerAllClientsEvent(System.String,System.Object[])">
+            <summary>
+            Broadcasts an event to all connected players.
+            </summary>
+            <param name="eventName">The name of the event.</param>
+            <param name="args">Arguments to pass to the event.</param>
+        </member>
+        <member name="M:CitizenFX.Core.Events.TriggerLatentAllClientsEvent(System.String,System.Int32,System.Object[])">
+            <summary>
+            Broadcasts an event to all connected players.
+            </summary>
+            <param name="eventName">The name of the event.</param>
+            <param name="bytesPerSecond">Amount of bytes send in 1 second.</param>
+            <param name="args">Arguments to pass to the event.</param>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandler.Enable">
+            <summary>
+            Should only be called by <see cref="M:CitizenFX.Core.BaseScript.Enable"/> or any other code that guarantees that it is only called once
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.Add(CitizenFX.Core.DynFunc,CitizenFX.Core.Binding)">
+            <summary>
+            Register an event handler
+            </summary>
+            <param name="deleg">delegate to call once triggered</param>
+            <param name="binding">limit calls to certain sources, e.g.: server only, client only</param>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.Remove(System.Delegate)">
+            <summary>
+            Unregister an event handler
+            </summary>
+            <param name="deleg">delegate to remove</param>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.op_Addition(CitizenFX.Core.EventHandlerSet,CitizenFX.Core.DynFunc)">
+            <summary>
+            Register an event handler
+            </summary>
+            <remarks>Will add it as <see cref="F:CitizenFX.Core.Binding.Local"/>, use <see cref="M:CitizenFX.Core.EventHandlerSet.Add(CitizenFX.Core.DynFunc,CitizenFX.Core.Binding)"/> to explicitly set the binding.</remarks>
+            <param name="entry">this event handler set</param>
+            <param name="deleg">delegate to register</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.op_Subtraction(CitizenFX.Core.EventHandlerSet,CitizenFX.Core.DynFunc)">
+            <summary>
+            Unregister an event handler
+            </summary>
+            <param name="entry">this event handler set</param>
+            <param name="deleg">delegate to register</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.op_Addition(CitizenFX.Core.EventHandlerSet,System.Delegate)">
+            <summary>
+            Register an event handler
+            </summary>
+            <remarks>Will add it as <see cref="F:CitizenFX.Core.Binding.Local"/>, use <see cref="M:CitizenFX.Core.EventHandlerSet.Add(CitizenFX.Core.DynFunc,CitizenFX.Core.Binding)"/> to explicitly set the binding.</remarks>
+            <param name="entry">this event handler set</param>
+            <param name="deleg">delegate to register</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.op_Subtraction(CitizenFX.Core.EventHandlerSet,System.Delegate)">
+            <summary>
+            Unregister an event handler
+            </summary>
+            <param name="entry">this event handler set</param>
+            <param name="deleg">delegate to register</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:CitizenFX.Core.EventHandlerSet.Enable">
+            <summary>
+            Should only be called by <see cref="M:CitizenFX.Core.EventHandler.Enable"/> or any other code that guarantees that it is only called once
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Exports.Enable">
+            <summary>
+            Should only be called by <see cref="M:CitizenFX.Core.BaseScript.Enable"/> or any other code that guarantees that it is only called once
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.MsgPackDeserializer.DeserializeArray(System.Byte*,System.Int64,System.String)">
+            <summary>
+            Starts deserialization from an array type
+            </summary>
+            <param name="data">ptr to byte data</param>
+            <param name="size">size of byte data</param>
+            <param name="netSource">from whom came this?</param>
+            <returns>arguments that can be passed into dynamic delegates</returns>
+        </member>
+        <member name="M:CitizenFX.Core.MsgPackDeserializer.ReadSingleLE">
+            <summary>
+            Read a <see cref="T:System.Single"/> stored as little endian, used for custom vectors
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.MsgPackSerializer.SerializeCoTaskMemory(System.Object,System.Boolean)">
+            <summary>
+            Experimental, uses the CoTask memory instead of a managed byte[]
+            </summary>
+            <param name="obj"></param>
+            <param name="remote"></param>
+            <returns></returns>
+        </member>
+        <member name="T:CitizenFX.Core.CoTaskMemoryStream">
+            <summary>
+            Experimental memory stream
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.ReferenceFunctionManager.Create(CitizenFX.Core.DynFunc)">
+            <summary>
+            Register a delegate to other runtimes and/or our host (reference function)
+            </summary>
+            <param name="method">Delagate to register to the external world</param>
+            <returns>( internalReferenceId, externalReferenceId )</returns>
+            <remarks>Don't alter the returned value</remarks>
+        </member>
+        <member name="M:CitizenFX.Core.ReferenceFunctionManager.Remove(System.Int32)">
+            <summary>
+            Remove reference function by id
+            </summary>
+            <param name="referenceId">Internal reference id of the reference to remove</param>
+        </member>
+        <member name="M:CitizenFX.Core.ReferenceFunctionManager.RemoveAllWithTarget(System.Object)">
+            <summary>
+            Remove all reference functions that are targeting a specific object
+            </summary>
+            <remarks>Slow, may need to be replaced</remarks>
+            <param name="target"></param>
+        </member>
+        <member name="M:CitizenFX.Core.ReferenceFunctionManager.SetDelegate(System.Int32,CitizenFX.Core.DynFunc)">
+            <summary>
+            Set reference function to another delegate
+            </summary>
+            <param name="referenceId">Reference id of the reference to remove</param>
+            <param name="newFunc">New delegate/method to set the reference function to</param>
+            <returns><see langword="true"/> if found and changed, <see langword="false"/> otherwise</returns>
+        </member>
         <member name="T:CitizenFX.Core.CString">
             <summary>
             A null-terminated byte string. Dedicated to interop with native code, equivalent to a (non-wide) c-string.
             </summary>
             <remarks>In general don't use this type where you would normally use <see cref="T:System.String"/> in your .NET code, it needs to do conversion between UTF16 and UTF8 and is therefore slower.
             This type and its conversions are more performant in regards to interop with native code (C++), and other runtimes, for these cases you may want to use this.</remarks>
+        </member>
+        <member name="P:CitizenFX.Core.CString.Empty">
+            <summary>
+            An empty <see cref="T:CitizenFX.Core.CString"/> equivalent to <see cref="F:System.String.Empty"/>, null terminated for interop.
+            </summary>				
         </member>
         <member name="M:CitizenFX.Core.CString.Create(System.Byte*)">
             <summary>
@@ -152,7 +681,7 @@
             <param name="index">the position we'd like to retrieve the byte from</param>
             <returns>byte representing an ASCII or UTF8 (biggest bit set) character</returns>
         </member>
-        <member name="M:CitizenFX.Core.CString.SubString(System.Int32)">
+        <member name="M:CitizenFX.Core.CString.Substring(System.Int32)">
             <summary>
             Retrieves a substring from this instance. The substring starts at a specified character position.
             </summary>
@@ -160,7 +689,7 @@
             <returns>CString with the requested part of characters of this string</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="startIndex"/> &lt; 0 or &gt;= Length</exception>
         </member>
-        <member name="M:CitizenFX.Core.CString.SubString(System.UInt32)">
+        <member name="M:CitizenFX.Core.CString.Substring(System.UInt32)">
             <summary>
             Retrieves a substring from this instance. The substring starts at a specified character position.
             Unsigned version, requires less checks for the same result.
@@ -188,6 +717,13 @@
             <returns>CString with the requested part of characters of this string</returns>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="startIndex"/> &lt; 0 or &gt;= Length</exception>
         </member>
+        <member name="M:CitizenFX.Core.CString.Concat(CitizenFX.Core.CString[])">
+            <summary>
+            Joins/merges all given strings
+            </summary>
+            <param name="strings">Strings to join</param>
+            <returns><see cref="T:CitizenFX.Core.CString"/> containing all given strings concatenated</returns>
+        </member>
         <member name="M:CitizenFX.Core.CString.ToString">
             <summary>
             Converts to a UTF16 string
@@ -212,6 +748,13 @@
             Convert a null-terminated c-string into a C# string
             </summary>
             <param name="str">null-terminated c-string</param>
+        </member>
+        <member name="M:CitizenFX.Core.CString.op_Implicit(CitizenFX.Core.OutString)~CitizenFX.Core.CString">
+            <summary>
+            Copy <see cref="T:CitizenFX.Core.OutString"/> into a null-terminated c-string
+            </summary>
+            <param name="str">OutString to copy</param>
+            <!-- Does put a dependency on OutString -->
         </member>
         <member name="M:CitizenFX.Core.CString.CompareASCII(System.String)">
             <summary>
@@ -244,59 +787,6 @@
             allows us to directly use `fixed(byte* ptr = cstring)`
             </summary>
             <returns>reference to first byte</returns>
-        </member>
-        <member name="M:CitizenFX.Core.Events.TriggerAllClientsEvent(System.String,System.Object[])">
-            <summary>
-            Broadcasts an event to all connected players.
-            </summary>
-            <param name="eventName">The name of the event.</param>
-            <param name="args">Arguments to pass to the event.</param>
-        </member>
-        <member name="M:CitizenFX.Core.Events.TriggerLatentAllClientsEvent(System.String,System.Int32,System.Object[])">
-            <summary>
-            Broadcasts an event to all connected players.
-            </summary>
-            <param name="eventName">The name of the event.</param>
-            <param name="bytesPerSecond">Amount of bytes send in 1 second.</param>
-            <param name="args">Arguments to pass to the event.</param>
-        </member>
-        <member name="M:CitizenFX.Core.EventHandlerSet.op_Addition(CitizenFX.Core.EventHandlerSet,System.Delegate)">
-            <summary>
-            Backwards compatibility
-            </summary>
-            <param name="entry"></param>
-            <param name="deleg"></param>
-            <returns></returns>
-        </member>
-        <member name="M:CitizenFX.Core.EventHandlerSet.op_Subtraction(CitizenFX.Core.EventHandlerSet,System.Delegate)">
-            <summary>
-            Backwards compatibility
-            </summary>
-            <param name="entry"></param>
-            <param name="deleg"></param>
-            <returns></returns>
-        </member>
-        <member name="M:CitizenFX.Core.MsgPackDeserializer.DeserializeArray(System.Byte*,System.Int64,System.String)">
-            <summary>
-            Starts deserialization from an array type
-            </summary>
-            <param name="data">ptr to byte data</param>
-            <param name="size">size of byte data</param>
-            <param name="netSource">from whom came this?</param>
-            <returns>arguments that can be passed into dynamic delegates</returns>
-        </member>
-        <member name="M:CitizenFX.Core.MsgPackSerializer.SerializeCoTaskMemory(System.Object,System.Boolean)">
-            <summary>
-            Experimental, uses the CoTask memory instead of a managed byte[]
-            </summary>
-            <param name="obj"></param>
-            <param name="remote"></param>
-            <returns></returns>
-        </member>
-        <member name="T:CitizenFX.Core.CoTaskMemoryStream">
-            <summary>
-            Experimental memory stream
-            </summary>
         </member>
         <member name="F:CitizenFX.Core.MathUtil.ZeroTolerance">
             <summary>
@@ -4712,12 +5202,12 @@
         </member>
         <member name="F:CitizenFX.Core.Vector3.Up">
             <summary>
-            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating up (0, 1, 0).
+            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating up (0, 0, 1).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Vector3.Down">
             <summary>
-            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating down (0, -1, 0).
+            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating down (0, 0, -1).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Vector3.Left">
@@ -4732,23 +5222,29 @@
         </member>
         <member name="F:CitizenFX.Core.Vector3.ForwardRH">
             <summary>
-            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating forward in a right-handed coordinate system (0, 0, -1).
+            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating forward in a right-handed coordinate system (0, 1, 0).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Vector3.ForwardLH">
             <summary>
-            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating forward in a left-handed coordinate system (0, 0, 1).
+            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating forward in a left-handed coordinate system (0, -1, 0).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Vector3.BackwardRH">
             <summary>
-            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating backward in a right-handed coordinate system (0, 0, 1).
+            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating backward in a right-handed coordinate system (0, -1, 0).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Vector3.BackwardLH">
             <summary>
-            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating backward in a left-handed coordinate system (0, 0, -1).
+            A unit <see cref="T:CitizenFX.Core.Vector3"/> designating backward in a left-handed coordinate system (0, 1, 0).
             </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Vector3.Forward">
+            <inheritdoc cref="F:CitizenFX.Core.Vector3.ForwardRH"/>
+        </member>
+        <member name="F:CitizenFX.Core.Vector3.Backward">
+            <inheritdoc cref="F:CitizenFX.Core.Vector3.BackwardRH"/>
         </member>
         <member name="F:CitizenFX.Core.Vector3.X">
             <summary>
@@ -6725,29 +7221,58 @@
             This approach is 10x faster than the v1 approach in combination with CString
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.OutString.op_Implicit(CitizenFX.Core.Native.OutString@)~System.String">
+        <member name="M:CitizenFX.Core.Native.CustomNativeInvoker.NativeStringResultSanitization(System.UInt64,CitizenFX.Core.Native.Argument[],System.UInt64*,System.Int32,System.UInt64*)">
             <summary>
-            A managed string that holds a conerted copy of the unmanaged ANSI string. If ptr is null, the method returns a null string.
+            Sanitization for string result types
+            Loops through all values given by the ScRT and deny any that equals the result value which isn't of the string type
             </summary>
-            <param name="str"></param>
+            <returns>Result from <see cref="M:CitizenFX.Core.ScriptContext.GetResult(System.Type,System.UInt64*,System.UInt64)"/> or null if sanitized</returns>
         </member>
-        <member name="M:CitizenFX.Core.Native.OutString.op_Implicit(CitizenFX.Core.Native.OutString@)~CitizenFX.Core.CString">
-            <summary>
-            A managed string that holds a copy of the unmanaged ANSI string. If ptr is null, the method returns a null string.
-            </summary>
-            <param name="str"></param>
-        </member>
-        <member name="M:CitizenFX.Core.Native.OutString.op_Implicit(CitizenFX.Core.Native.OutString@)~System.Byte[]">
-            <summary>
-            A managed byte[] that holds a copy of the unmanaged ANSI string. If ptr is null, the method returns a null string.
-            </summary>
-            <param name="str"></param>
+        <member name="M:CitizenFX.Core.Native.MemoryAccess.Offset(System.IntPtr,System.Int32)">
+            <remarks>
+            Purely used to circumvent <see cref="T:System.IntPtr"/> operator+'s <see langword="internal"/> accessibility in game libraries
+            TODO: make mscorlib IntPtr operator+ public and [SecurityCritical]
+            </remarks>
         </member>
         <member name="P:CitizenFX.Core.UnmanagedTypeInfo`1.Size">
             <summary>
             Get unmanaged type size, this will actually request the size from native, then we cache it
             </summary>
             <returns>unmanaged size of T</returns>
+        </member>
+        <member name="M:CitizenFX.Core.OutString.op_Implicit(CitizenFX.Core.OutString@)~System.String">
+            <summary>
+            A managed string that holds a conerted copy of the unmanaged ANSI string. If ptr is null, the method returns a null string.
+            </summary>
+            <param name="str"></param>
+        </member>
+        <member name="M:CitizenFX.Core.OutString.op_Explicit(CitizenFX.Core.OutString@)~System.Byte[]">
+            <summary>
+            A managed byte[] that holds a copy of the unmanaged ANSI string. If ptr is null, the method returns a null string.
+            </summary>
+            <param name="str"></param>
+        </member>
+        <member name="M:CitizenFX.Core.OutString.ToCString">
+            <summary>
+            Creates a null terminated C-string out of the returned string
+            </summary>
+            <returns>null terminated C-string</returns>
+        </member>
+        <member name="M:CitizenFX.Core.OutString.SubString(System.UInt32,System.UInt32)">
+            <summary>
+            Retrieves a substring from this string. Starting at the specified <paramref name="startIndex"/> in strides of <see cref="T:System.Byte"/>
+            </summary>
+            <param name="startIndex">Character index to start the new string with</param>
+            <param name="length">Amount of characters requested, after <paramref name="startIndex"/></param>
+            <returns><see cref="T:System.String"/> starting from <paramref name="startIndex"/>, <see cref="F:System.String.Empty"/> if we passed the end, or <see langword="null"/></returns>
+        </member>
+        <member name="M:CitizenFX.Core.OutString.SubCString(System.UInt32,System.UInt32)">
+            <summary>
+            Retrieves a substring from this string. Starting at the specified <paramref name="startIndex"/> in strides of <see cref="T:System.Byte"/>
+            </summary>
+            <param name="startIndex">Character index to start the new string with</param>
+            <param name="length">Amount of characters requested, after <paramref name="startIndex"/></param>
+            <returns><see cref="T:CitizenFX.Core.CString"/> starting from <paramref name="startIndex"/>, <see cref="P:CitizenFX.Core.CString.Empty"/> if we passed the end, or <see langword="null"/></returns>
         </member>
         <member name="M:CitizenFX.Core.Profiler.EnterScope(System.Func{System.String})">
             <param name="scopeName">Will only be evaluated when we're profiling, good for formatting strings</param>
@@ -6951,6 +7476,8 @@
                 *   2612
                 *   2699
                 *   2802
+                *   2944
+                *   3095
             *   RedM
                 *   1311
                 *   1355
@@ -7188,6 +7715,17 @@
             </summary>
             <returns>
             A boolean value.
+            </returns>
+        </member>
+        <member name="M:CitizenFX.Shared.Native.Natives.IsEntityPositionFrozen(System.Int32)">
+            <summary>
+            A getter for [FREEZE_ENTITY_POSITION](#\_0x428CA6DBD1094446).
+            </summary>
+            <param name="entity">
+            The entity to check for
+            </param>
+            <returns>
+            Boolean stating if it is frozen or not.
             </returns>
         </member>
         <member name="M:CitizenFX.Shared.Native.Natives.IsPrincipalAceAllowed(CitizenFX.Core.CString,CitizenFX.Core.CString)">
@@ -7448,6 +7986,8 @@
                 *   2612
                 *   2699
                 *   2802
+                *   2944
+                *   3095
             *   RedM
                 *   1311
                 *   1355
@@ -7595,6 +8135,11 @@
         <member name="F:CitizenFX.Shared.Native.Hash.IS_DUPLICITY_VERSION">
             <summary>
             Gets whether or not this is the CitizenFX server.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Shared.Native.Hash.IS_ENTITY_POSITION_FROZEN">
+            <summary>
+            A getter for [FREEZE_ENTITY_POSITION](#\_0x428CA6DBD1094446).
             </summary>
         </member>
         <member name="F:CitizenFX.Shared.Native.Hash.IS_PRINCIPAL_ACE_ALLOWED">
