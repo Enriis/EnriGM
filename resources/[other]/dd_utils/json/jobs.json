@@ -1,0 +1,31 @@
+{
+    "lsc": {
+        "label": "Los Santos Custom",
+        "illegale" : false,
+        "gradi": {
+            "1" : "Dipendente",
+            "2" : "Vice Direttore",
+            "3" : "Direttore"
+        }
+    },
+
+    "lspd": {
+        "label": "LSPD",
+        "illegale" : false,
+        "gradi": {
+            "1" : "Recluta",
+            "2" : "Agente",
+            "3" : "Agente I",
+            "4" : "Agente II",
+            "5" : "Agente III",
+            "6" : "Agente Scelto",
+            "7" : "Sergente",
+            "8" : "Sergente Scelto",
+            "9" : "Tenente",
+            "10": "Tenente Scelto",
+            "11": "Deputy Chief",
+            "12": "Chief"
+        }
+    }
+
+}

@@ -22,6 +22,13 @@ if not IsDuplicityVersion() then -- Only register this event for the client
 end
 
 
+function sprint(asd)
+    CreateThread(function()
+        Wait(0)
+        print(asd)
+    end)
+end
+
 local isSelectingActive = false
 local closestPed = nil
 

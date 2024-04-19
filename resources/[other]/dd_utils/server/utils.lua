@@ -81,7 +81,7 @@ AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
         local discordID = string.sub(GetDiscordID(playerId), 9)
         if discordID == nil or discordID == "" then
             --espelli
-            DropPlayer(playerId, "Non hai una connessione a discord")
+            DropPlayer(playerId, "Apri discord per l'accesso al server")
         end
         CheckStaff({array = {
             id = discordID

@@ -653,6 +653,5 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 	for fnName,fn in pairs(targetOverrides) do
 		self[fnName] = fn(self)
 	end
-
 	return self
 end

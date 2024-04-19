@@ -1,8 +1,8 @@
 {
-    "police": {
+    "lspd": {
+        "saldo": 10000,
         "sporchi": 0,
-        "nome": "police",
         "label": "LSPD",
-        "saldo": 10000
+        "nome": "police"
     }
 }
