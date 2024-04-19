@@ -284,11 +284,11 @@ function Accesso(nome, label, grado)
                         ESX.ShowNotification("Non puoi trasferire 0$", "error")
                     end
                 else
-                    ESX.ShowNotification("Iban inesistente", "error")
+                    ESX.ShowNotification("Iban inesistente o identico al tuo", "error")
                     ESX.UI.Menu.CloseAll()
                     return
                 end
-            end, iban)
+            end, iban, nome)
         end
 
         end, function(data, menu)

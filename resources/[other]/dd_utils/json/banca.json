@@ -1,14 +1,14 @@
 {
-    "pacific": {
-        "tasse": 85000,
-        "fondo": 100576500,
-        "label": "Pacific Bank",
-        "grado": 0
-    },
     "fleeca": {
-        "tasse": 10000,
-        "fondo": 2055000,
         "label": "Fleeca Bank",
-        "grado": 2
+        "grado": 2,
+        "fondo": 2065000,
+        "tasse": 10000
+    },
+    "pacific": {
+        "label": "Pacific Bank",
+        "grado": 0,
+        "fondo": 100576500,
+        "tasse": 85000
     }
 }

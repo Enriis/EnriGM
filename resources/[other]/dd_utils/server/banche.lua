@@ -10,7 +10,13 @@ ESX.RegisterServerCallback("en_bank:getInfoBank", function(source, cb, bank)
     end
 end)
 
-ESX.RegisterServerCallback("en_bank:checkIBAN", function(source, cb, iban)
+ESX.RegisterServerCallback("en_bank:checkIBAN", function(source, cb, iban, bank)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local banca = LoadResourceFile(GetCurrentResourceName(), "json/bancapl.json")
+    local data_banca = json.decode(banca or '{}')
+    if iban == data_banca[xPlayer.getIdentifier()][bank].iban then
+        cb(false)
+    end
     local val = GetIban(iban)
     cb(val)
 end)
