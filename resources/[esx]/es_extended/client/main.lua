@@ -195,14 +195,6 @@ end)
 
 RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(Job)
-	if Config.EnableHud then
-		local gradeLabel = Job.grade_label ~= Job.label and Job.grade_label or ''
-		if gradeLabel ~= '' then gradeLabel = ' - '..gradeLabel end
-		ESX.UI.HUD.UpdateElement('job', {
-			job_label = Job.label,
-			grade_label = gradeLabel
-		})
-	end
 	ESX.SetPlayerData('job', Job)
 end)
 
