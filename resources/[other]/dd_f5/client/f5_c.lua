@@ -48,14 +48,27 @@ DD.MenuMain = function()
     end)
 end
 
+local LavoriGiocatore = {}
+
+RegisterNetEvent("dd_lavori:loadF5", function(args)
+    LavoriGiocatore = args
+end)
+
+
 DD.MenuPerosnale = function()
+    local elementi = {}
+    if json.encode(LavoriGiocatore) == "[]" or not LavoriGiocatore then
+        ESX.ShowNotification("non hai lavori", "error")
+        return
+    end
+    for k,v in pairs(LavoriGiocatore) do
+        table.insert(elementi, {label = "Lavoro: "..v.labels})
+        table.insert(elementi, {label = "Grado: "..v.grado})
+    end
     ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'dd_f5_main_pers', {
         title = 'Menu Personale | ID: '..GetPlayerServerId(PlayerId()),
         align = 'top-right',
-        elements = {
-            {label = "Lavoro: "..ESX.PlayerData.job.label, value = false},
-            {label = "Grado: "..ESX.PlayerData.job.grade_label, value = false},
-        }
+        elements = elementi
     }, function(data, menu)
         menu.close()
     end, function(data, menu)

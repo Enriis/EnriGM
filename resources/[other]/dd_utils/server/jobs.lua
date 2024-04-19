@@ -9,7 +9,6 @@ PlayersJobs = data_pljobs
 
 
 function EditJson(tabled)
-    sprint("Arrivo lo stesso")
     SaveResourceFile(GetCurrentResourceName(), "json/jobs_data.json", json.encode(tabled, {indent = true}), -1)
 end
 
@@ -25,7 +24,8 @@ function setLavoro(id, index, job, job_grade)
         if not PlayersJobs[steam][index] then
             PlayersJobs[steam][index] = {
                 lavoro = job,
-                grado = job_grade
+                grado = job_grade,
+                labels = data_jobs[job].label
             }
             sprint("Aggiunto lavoro al giocatore")
         else
@@ -36,13 +36,15 @@ function setLavoro(id, index, job, job_grade)
         PlayersJobs[steam] = {
             [index] = {
                 lavoro = job,
-                grado = job_grade
+                grado = job_grade,
+                labels = data_jobs[job].label
             }
         }
 
     end
     -- sprint("jobs: "..json.encode(PlayersJobs, {indent = true}))
     EditJson(PlayersJobs)
+    TriggerEvent("dd_lavori:loadClient_s", id.source)
 end
 
 RegisterCommand("dailavoro", function(source, args)
@@ -60,4 +62,10 @@ RegisterCommand("dailavoro", function(source, args)
     else
         sprint("giocatore non trovato")
     end
+end)
+
+RegisterServerEvent("dd_lavori:loadClient_s", function(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    xPlayer.triggerEvent("dd_lavori:loadClient_c", PlayersJobs[xPlayer.getIdentifier()])
+    xPlayer.triggerEvent("dd_lavori:loadF5", PlayersJobs[xPlayer.getIdentifier()])
 end)
