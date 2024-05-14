@@ -9,7 +9,7 @@
         }
     },
 
-    "lspd": {
+    "police": {
         "label": "LSPD",
         "illegale" : false,
         "gradi": {

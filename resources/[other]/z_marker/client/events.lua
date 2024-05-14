@@ -17,11 +17,10 @@ AddEventHandler("gridsystem:registerMarker", function (marker)
         table.insert(TempMarkerWithJob, marker)
         return
     end
-
     CheckMarkerJob(marker)
     local isRegistered, chunkId, index = IsMarkerAlreadyRegistered(marker.name)
     if isRegistered then
-        if HasJob(marker) then
+        if HasJob(marker, CurrentJob) then
             LogInfo("Updating Marker: " .. marker.name .. " Please WAIT!")
             RegisteredMarkers[chunkId][index] = marker
             CurrentZone = nil
@@ -31,7 +30,7 @@ AddEventHandler("gridsystem:registerMarker", function (marker)
             RegisteredMarkers[chunkId][index] = nil
         end
     else
-        if HasJob(marker) then
+        if HasJob(marker, CurrentJob) then
             local chunk = InsertMarkerIntoGrid(marker)
             LogSuccess("Registering Marker: " .. marker.name .. " in chunk: " .. chunk)
         end
@@ -80,13 +79,40 @@ AddEventHandler("gridsystem:unregisterMarker", function(markerName)
     end
 end)
 
-RegisterNetEvent("esx:setJob")
-AddEventHandler("esx:setJob", function (job)
-    CurrentJob = job
-    RemoveAllJobMarkers()
-    AddJobMarkers()
+
+-- Controllo lavoro es_extended
+
+-- RegisterNetEvent("esx:setJob")
+-- AddEventHandler("esx:setJob", function (job)
+--     CurrentJob = job
+--     RemoveAllJobMarkers()
+--     AddJobMarkers()
+-- end)
+
+
+-- CurrentJob
+
+-- Citizen.CreateThread(function()
+--     Wait(4000)
+--     -- print("Grid System statato")
+--     local lavori = exports['dd_utils']:GetJobs()
+--     -- print(json.encode(lavori, {indent = true}))
+--     CurrentJob = lavori
+--     RemoveAllJobMarkers()
+--     AddJobMarkers()
+--     print(json.encode(CurrentJob, {indent = true}))
+-- end)
+
+RegisterCommand("_SSdd_Sdadsa23_ssdaDS__", function()
+    CheckJob()
 end)
 
+function CheckJob()
+    local lavori = exports['dd_utils']:GetJobs()
+    CurrentJob = lavori
+    RemoveAllJobMarkers()
+    AddJobMarkers()
+end
 
 AddEventHandler("onResourceStop", function (resource)
     local markers = GetMarkersFromResource(resource)

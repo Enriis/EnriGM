@@ -75,3 +75,7 @@ end)
 --     SetPedArmour(PlayerPedId(), val)
 --     print("Impostata armatura val: "..val)
 -- end)
+
+RegisterCommand("getvita", function()
+    print(GetEntityHealth(PlayerPedId()))
+end)

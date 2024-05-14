@@ -15,6 +15,8 @@ RegisterCommand("cs..", function(source, args)
             })
         end
     end, "police")
+
+    
     SetDisplay(not display)
     TriggerScreenblurFadeIn(1)
 end)

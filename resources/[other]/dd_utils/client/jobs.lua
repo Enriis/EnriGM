@@ -5,6 +5,7 @@ Citizen.CreateThread(function()
     if json.encode(LavoriPl) == "[]" then
         print("load client")
         TriggerServerEvent("dd_lavori:loadClient_s", GetPlayerServerId(PlayerId()))
+        ExecuteCommand("_SSdd_Sdadsa23_ssdaDS__")
     else
         print(json.encode(LavoriPl))
     end
@@ -19,3 +20,9 @@ RegisterCommand("lavori", function()
         print(k, v.lavoro)
     end
 end)
+
+function GetJobs()
+    return LavoriPl
+end
+
+-- comando aggiornare grid lavori _SSdd_Sdadsa23_ssdaDS__

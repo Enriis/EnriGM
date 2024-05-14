@@ -85,10 +85,18 @@ CheckMarkerJob = function (marker)
     table.insert(MarkerWithJob[marker.permission], marker)
 end
 
-HasJob = function (marker)
+HasJob = function (marker, jobs)
+    local lavori = jobs
     if not marker.permission then return true end
-    while CurrentJob == nil do Wait(100) end
-    return (CurrentJob.name == marker.permission and CurrentJob.grade >= marker.jobGrade)
+    while jobs == nil do Wait(1000) print("lollll") end
+    for k,v in pairs(lavori) do
+        if marker.permission == v.lavoro then
+            return true
+        else 
+            return false
+        end
+    end
+    --return (CurrentJob.name == marker.permission and CurrentJob.grade >= marker.jobGrade)
 end
 
 
@@ -105,13 +113,26 @@ RemoveAllJobMarkers = function ()
 end
 
 AddJobMarkers = function ()
-    if MarkerWithJob[CurrentJob.name] then
-        for i = 1, #MarkerWithJob[CurrentJob.name] do
-            if HasJob(MarkerWithJob[CurrentJob.name][i]) then
-                InsertMarkerIntoGrid(MarkerWithJob[CurrentJob.name][i])
+    print(json.encode(MarkerWithJob, {indent = true}))
+    for k,v in pairs(CurrentJob) do
+        if MarkerWithJob[v.lavoro] then
+            for i = 1, #MarkerWithJob[v.lavoro] do
+                print(MarkerWithJob[v.lavoro][i])
+                if HasJob(MarkerWithJob[v.lavoro][i]) then
+                    InsertMarkerIntoGrid(MarkerWithJob[v.lavoro][i])
+                end
             end
         end
     end
+
+    -- old 
+    -- if MarkerWithJob[CurrentJob.name] then
+    --     for i = 1, #MarkerWithJob[CurrentJob.name] do
+    --         if HasJob(MarkerWithJob[CurrentJob.name][i]) then
+    --             InsertMarkerIntoGrid(MarkerWithJob[CurrentJob.name][i])
+    --         end
+    --     end
+    -- end
 end
 
 InsertMarkerIntoGrid = function (marker)

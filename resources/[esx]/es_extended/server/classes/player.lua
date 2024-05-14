@@ -47,6 +47,7 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 			self.armour = 100
 		end
 		self.triggerEvent("dd_utils:giveg", self.armout)
+		print(self.armout.." del giocatore"..playerId)
 	end
 
 	function self.addStatus(index, value)

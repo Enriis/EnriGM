@@ -18,7 +18,8 @@ CreateThread(function ()
         Wait(10)
     end
 
-    CurrentJob = ESX.GetPlayerData().job
+    CurrentJob = exports['dd_utils']:GetJobs()
+    print(json.encode(CurrentJob, {indent = true}))
     RegisterTempMarkers()
 end)
 

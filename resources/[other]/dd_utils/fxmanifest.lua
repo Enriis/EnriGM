@@ -19,6 +19,7 @@ server_scripts {
     'server/*.lua'
 }
 
+export "GetJobs"
 
 files {
     'json/*.json'
